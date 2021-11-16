@@ -1,4 +1,5 @@
-# Basic Sample Hardhat Project with TypeScript
+# NUSIC Core Contracts
+
 
 For TypeScript Configuration use this [link](https://hardhat.org/guides/typescript.html)
 
