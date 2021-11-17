@@ -6,8 +6,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./DynamicNFT.sol";
 import "./RatingEngine.sol";
+import "./BondNFTGenerator.sol";
 
-contract NFTManager is ChainlinkClient, Ownable {
+contract BondNFTManager is ChainlinkClient, Ownable {
 
     using Strings for string;
     using Chainlink for Chainlink.Request;
@@ -22,6 +23,7 @@ contract NFTManager is ChainlinkClient, Ownable {
 
     string private defaultEndpont = "channel";
     RatingEngine private ratingEngine;
+    BondNFTGenerator private bondNFTGenerator;
 
     event ListenerRequestInitiated(bytes32 indexed _requestId);
     event RequestListenerFulfilled(bytes32 indexed _requestId, uint256 indexed _listeners, address indexed nftAddress);
@@ -42,13 +44,16 @@ contract NFTManager is ChainlinkClient, Ownable {
 
     mapping(bytes32 => BondConfig) private bondConfigs;
 
-
-    constructor(address _oracle, string memory _jobId, address _ratingEngine) {   
+    constructor() {   
         setPublicChainlinkToken();
+    }
+
+    function initialize(address _oracle, string memory _jobId, address _ratingEngine, address _bondNftGenerator) public onlyOwner {
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
         fee = 1 * 10 ** 18; // (Varies by network and job)
         ratingEngine = RatingEngine(_ratingEngine);
+        bondNFTGenerator = BondNFTGenerator(_bondNftGenerator);
     }
 
     function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, uint256 _fundingAmount, uint256 _averageQuarterlyIncome, uint256 _numberOfYears) public {
@@ -82,8 +87,9 @@ contract NFTManager is ChainlinkClient, Ownable {
         bondConfigs[_requestId].listeners = _listeners;
         calculateFacevalue(_requestId);
         BondConfig memory _bondConfig = bondConfigs[_requestId];
-        DynamicNFT nft = new DynamicNFT(100,_bondConfig.channelId,_bondConfig.endpint, _bondConfig.listeners);
-        emit RequestListenerFulfilled(_requestId, _listeners, address(nft));
+        //DynamicNFT nft = new DynamicNFT(100,_bondConfig.channelId,_bondConfig.endpint, _bondConfig.listeners);
+        address nftAddress = bondNFTGenerator.generateNFT(100,_bondConfig.channelId,_bondConfig.endpint, _bondConfig.listeners);
+        emit RequestListenerFulfilled(_requestId, _listeners, nftAddress);
     }
 
     function calculateFacevalue(bytes32 _requestId) private {
