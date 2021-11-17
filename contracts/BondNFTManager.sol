@@ -36,7 +36,6 @@ contract BondNFTManager is ChainlinkClient, Ownable {
         bytes32 requestId;
         uint256 faceValue;
         uint256 listeners;
-        
     }
 
     mapping(bytes32 => BondConfig) private bondConfigs;
@@ -90,6 +89,8 @@ contract BondNFTManager is ChainlinkClient, Ownable {
         //BondConfig memory _bondConfig = bondConfigs[_requestId];
         //DynamicNFT nft = new DynamicNFT(100,_bondConfig.channelId,_bondConfig.endpint, _bondConfig.listeners);
         //address nftAddress = bondNFTGenerator.generateNFT(100,_bondConfig.channelId,_bondConfig.endpint, _bondConfig.listeners);
+        BondNFT bondNft = BondNFT(requestToNFTAddress[_requestId]);
+        bondNft.updateTotalListeners(_listeners);
         emit RequestListenerFulfilled(_requestId, _listeners, requestToNFTAddress[_requestId]);
     }
 

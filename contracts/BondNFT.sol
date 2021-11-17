@@ -58,10 +58,8 @@ contract BondNFT is ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, _tokenURI);
     }
 
-
-    function getAPIOverView()
-        public view returns (uint256,string memory,string memory) {
-        return (totalListeners,channelId,endpoint);
+    function updateTotalListeners(uint256 _listeners) public {
+        totalListeners = _listeners;
     }
 
     function stringToBytes32(string memory source) private pure returns (bytes32 result) {
