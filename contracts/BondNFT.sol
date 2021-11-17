@@ -5,26 +5,44 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract DynamicNFT is ERC721URIStorage, Ownable {
+contract BondNFT is ERC721URIStorage, Ownable {
     using Strings for string;
 
-    uint256 public totalListeners;
-    string public channelId;
-    string public endpoint;
-
-    uint256 public immutable maxSupply;
     uint256 public totalSupply;
-    
-    constructor(uint256 _maxSupply,string memory _channelId, string memory _endpoint, uint256 _totalListeners) ERC721("DynamicNFT", "DYNFT") {
-        maxSupply = _maxSupply;
+
+    string public artistName;
+    string public artistId;
+    string public channelId;
+    string endpoint;
+    string public audiusArtistId;
+    uint256 public fundingAmount;
+    uint256 public numberOfYears;
+    uint256 public immutable numberOfBonds; // Same as Max Supply
+    address public issuerAddress;
+    uint256 public faceValue;
+    uint256 public totalListeners;
+    //string memory _artistName, string memory _artistId, string memory _channelId, string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue
+    constructor(string memory _artistName, string memory _artistId, string memory _channelId, 
+                string memory _endpoint, string memory _audiusArtistId, uint256 _fundingAmount, 
+                uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue) 
+                ERC721("BondNFT", "BNFT") {
+        artistName = _artistName;
+        artistId = _artistId;
         channelId = _channelId;
         endpoint = _endpoint;
-        totalListeners = _totalListeners;
-
+        audiusArtistId = _audiusArtistId;
+        fundingAmount = _fundingAmount;
+        numberOfYears = _numberOfYears;
+        numberOfBonds = _numberOfBonds;
+        issuerAddress = msg.sender;
+        faceValue = _facevalue;
+        
+        //totalListeners // this will be updated later stage 
+        /*
         for(uint16 i=0; i<_maxSupply; i++) {
             _safeMint(msg.sender, totalSupply);
             totalSupply++;
-        }
+        }*/
     }
 
 
