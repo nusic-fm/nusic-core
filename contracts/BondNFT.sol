@@ -21,7 +21,7 @@ contract BondNFT is ERC721URIStorage, Ownable {
     address public issuerAddress;
     uint256 public faceValue;
     uint256 public totalListeners;
-    //string memory _artistName, string memory _artistId, string memory _channelId, string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue
+    
     constructor(string memory _artistName, string memory _artistId, string memory _channelId, 
                 string memory _endpoint, string memory _audiusArtistId, uint256 _fundingAmount, 
                 uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue) 
@@ -36,15 +36,14 @@ contract BondNFT is ERC721URIStorage, Ownable {
         numberOfBonds = _numberOfBonds;
         issuerAddress = msg.sender;
         faceValue = _facevalue;
-        
-        //totalListeners // this will be updated later stage 
-        /*
-        for(uint16 i=0; i<_maxSupply; i++) {
-            _safeMint(msg.sender, totalSupply);
-            totalSupply++;
-        }*/
     }
 
+    function mintBonds() public onlyOwner {
+        for(uint16 i=0; i<numberOfBonds; i++) {
+            _safeMint(msg.sender, totalSupply);
+            totalSupply++;
+        }
+    }
 
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
         return tokenURI(tokenId);
