@@ -58,6 +58,10 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         }
     }
 
+    function receiveFunding() public payable {
+
+    }
+
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
         return tokenURI(tokenId);
     }

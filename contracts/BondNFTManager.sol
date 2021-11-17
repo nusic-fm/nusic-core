@@ -44,25 +44,22 @@ contract BondNFTManager is Ownable {
         chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
     }
 
-    function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, string memory _bondSymbol) public {
+    function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, 
+                        string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears,
+                        uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
+                        string memory _bondSymbol) public {
         
         address nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol);
         BondNFT bondNFT = BondNFT(nftAddress);
-        bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont, _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds, _facevalue, address(chainlinkOracleInfo));
+        bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont,
+                            _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds,
+                            _facevalue, address(chainlinkOracleInfo));
         
-        BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,_audiusArtistId,_fundingAmount, _numberOfYears, _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
+        BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,
+                                                _audiusArtistId,_fundingAmount, _numberOfYears,
+                                                _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
         userBondConfigs[msg.sender].push(_config);
         bondNfts.push(nftAddress);
-        /*
-        address nftAddress = bondNFTGenerator.generateNFT(
-                                _artistName, _artistId, _channelId, defaultEndpont, _audiusArtistId,
-                                _fundingAmount, _numberOfYears, _numberOfBonds, _facevalue,
-                                address(chainlinkOracleInfo), _bondName, _bondSymbol);
-
-        BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,_audiusArtistId,_fundingAmount, _numberOfYears, _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
-        userBondConfigs[msg.sender].push(_config);
-        bondNfts.push(nftAddress);
-        */
     }
 
 
