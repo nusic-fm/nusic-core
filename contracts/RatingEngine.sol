@@ -11,9 +11,10 @@ contract RatingEngine is Ownable {
 
     function setRiskPremium(uint256 _riskPremium) public onlyOwner() {
         riskPremium = _riskPremium;
-    }  
+    }
 
-    function getRating() public returns (string memory){
+    function getRating() public view returns (string memory){
+        riskPremium;
         return "BBB";
     }
 }
