@@ -49,6 +49,7 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         issuerAddress = msg.sender;
         faceValue = _facevalue;
         chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
+        getLatestListeners();
     }
 
     function mintBonds() public onlyOwner {
