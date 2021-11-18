@@ -39,8 +39,9 @@ contract BondNFTManager is Ownable {
         uint256 bondvalue;
     }
 
-    mapping(address => BondConfig[]) private userBondConfigs;
-    mapping(address => AssetPoolInfo[]) private userAssetPools;
+    mapping(address => BondConfig[]) public userBondConfigs;
+    mapping(address => AssetPoolInfo[]) public userAssetPools;
+
     address[] public allBondNfts;
     address[] public allAssetPools;
     
@@ -82,7 +83,7 @@ contract BondNFTManager is Ownable {
     function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, 
                         string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears,
                         uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
-                        string memory _bondSymbol) public returns(address nftAddress) {
+                        string memory _bondSymbol, address _assetPoolAddress) public returns(address nftAddress) {
         
         nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol);
         BondNFT bondNFT = BondNFT(nftAddress);
@@ -95,7 +96,19 @@ contract BondNFTManager is Ownable {
                                                 _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
         userBondConfigs[msg.sender].push(_config);
         allBondNfts.push(nftAddress);
+        AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,_assetPoolAddress);
+        assetPoolInfo.bondNftAddress = nftAddress;
         emit BondNFTCreated(msg.sender,nftAddress,_artistId,_bondName,_bondSymbol);
+    }
+
+    function getAssetPoolInfo(address _artist, address _assetPoolAddress) private view returns(AssetPoolInfo memory) {
+        AssetPoolInfo[] memory list = userAssetPools[_artist];
+        for(uint32 i=0;i<list.length;i++ ) {
+            if(list[i].assetPoolAddress == _assetPoolAddress) {
+                return list[i];
+            }
+        }
+        require(false, "Asset Pool Not Found");
     }
 
     function mintNFTBond(address _nftAddress) public {
