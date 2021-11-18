@@ -40,8 +40,7 @@ contract BondNFTManager is Ownable {
         address indexed bondNftAddress,
         string indexed artistId,
         string name,
-        string symbol,
-        string channelId
+        string symbol
     );
 
     event BondNFTMinted(
@@ -71,7 +70,7 @@ contract BondNFTManager is Ownable {
                                                 _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
         userBondConfigs[msg.sender].push(_config);
         bondNfts.push(nftAddress);
-        emit BondNFTCreated(msg.sender,nftAddress,_artistId,_bondName,_bondSymbol,_channelId);
+        emit BondNFTCreated(msg.sender,nftAddress,_artistId,_bondName,_bondSymbol);
     }
 
     function mintNFTBond(address _nftAddress) public {

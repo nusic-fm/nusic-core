@@ -67,7 +67,7 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         return tokenURI(tokenId);
     }
 
-    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) public onlyOwner{
         require(
             _isApprovedOrOwner(_msgSender(), tokenId),
             "ERC721: transfer caller is not owner nor approved"
@@ -80,7 +80,7 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
     }
 
 
-    function getLatestListeners() public returns (bytes32)  {
+    function getLatestListeners() public returns (bytes32) {
         Chainlink.Request memory request = buildChainlinkRequest(chainlinkOracleInfo.getJobId(), address(this), this.fulfill.selector);
         
         request.add("id", channelId);
@@ -91,8 +91,7 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         return requestId; 
     }
 
-    function fulfill(bytes32 _requestId, uint256 _listeners) public recordChainlinkFulfillment(_requestId)
-    {
+    function fulfill(bytes32 _requestId, uint256 _listeners) public recordChainlinkFulfillment(_requestId) {
         totalListeners = _listeners;
         emit RequestListenerFulfilled(_requestId, _listeners, address(this));
     }

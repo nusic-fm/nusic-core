@@ -1,25 +1,35 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 import { ethers, run } from 'hardhat';
+import { BondNFTGenerator, BondNFTGenerator__factory, BondNFTManager, BondNFTManager__factory, ChainlinkClient__factory, ChainlinkOracleInfo, ChainlinkOracleInfo__factory, RatingEngine, RatingEngine__factory } from '../typechain';
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  
+  const oracleAddress = "0xcE4452C43390842bE32B45964945276A78985E88";
+  const jobId = "a90ac9049d3b4f5abcb315ff1a3a367a";
+  const fee = "1000000000000000000"; // 1 Link token
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const RatingEngine:RatingEngine__factory = await ethers.getContractFactory("RatingEngine");
+  const ratingEngine:RatingEngine = await RatingEngine.deploy();
+  await ratingEngine.deployed();
 
-  await greeter.deployed();
+  const ChainlinkOracleInfo:ChainlinkOracleInfo__factory = await ethers.getContractFactory("ChainlinkOracleInfo");
+  const chainlinkOracleInfo:ChainlinkOracleInfo = await ChainlinkOracleInfo.deploy();
+  await chainlinkOracleInfo.deployed();
+  await chainlinkOracleInfo.initialize(oracleAddress,jobId,fee);
 
-  console.log("Greeter deployed to:", greeter.address);
+  const BondNFTGenerator:BondNFTGenerator__factory = await ethers.getContractFactory("BondNFTGenerator");
+  const bondNFTGenerator:BondNFTGenerator = await BondNFTGenerator.deploy();
+  await bondNFTGenerator.deployed();
+
+  const BondNFTManager:BondNFTManager__factory = await ethers.getContractFactory("BondNFTManager");
+  const bondNFTManager:BondNFTManager = await BondNFTManager.deploy();
+  await bondNFTManager.deployed();
+
+  await bondNFTManager.initialize(ratingEngine.address, bondNFTGenerator.address, chainlinkOracleInfo.address);
+
+  console.log("RatingEngine deployed to:", ratingEngine.address);
+  console.log("ChainlinkOracleInfo deployed to:", chainlinkOracleInfo.address);
+  console.log("BondNFTGenerator deployed to:", bondNFTGenerator.address);
+  console.log("BondNFTManager deployed to:", bondNFTManager.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
