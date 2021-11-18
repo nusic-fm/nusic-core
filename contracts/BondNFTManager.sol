@@ -7,6 +7,7 @@ import "./RatingEngine.sol";
 import "./BondNFTGenerator.sol";
 import "./ChainlinkOracleInfo.sol";
 import "./BondNFT.sol";
+import "./AssetPool.sol";
 
 contract BondNFTManager is Ownable {
 
@@ -32,8 +33,16 @@ contract BondNFTManager is Ownable {
         address nftAddress;
     }
 
+    struct AssetPoolInfo {
+        address assetPoolAddress;
+        address bondNftAddress;
+        uint256 bondvalue;
+    }
+
     mapping(address => BondConfig[]) private userBondConfigs;
-    address[] public bondNfts;
+    mapping(address => AssetPoolInfo[]) private userAssetPools;
+    address[] public allBondNfts;
+    address[] public allAssetPools;
     
     event BondNFTCreated(
         address indexed issuerAddress,
@@ -48,10 +57,26 @@ contract BondNFTManager is Ownable {
         uint256 numberOfBonds
     );
 
+    event AssetPoolCreated(
+        address artist,
+        address assetPool,
+        uint256 bondValue
+    );
+
     function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkOracleInfoAddress) public onlyOwner {
         ratingEngine = RatingEngine(_ratingEngine);
         bondNFTGenerator = BondNFTGenerator(_bondNftGenerator);
         chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
+    }
+
+    function createAssetPool(uint256 _bondValue) public returns(address assetPoolAddress) {
+        require(_bondValue > 0, "Value of the bond cannot be 0");
+        AssetPool assetPool = new AssetPool();
+        assetPoolAddress = address(assetPool);
+        assetPool.initialize(msg.sender, _bondValue);
+        userAssetPools[msg.sender].push(AssetPoolInfo(assetPoolAddress,address(0),_bondValue));
+        allAssetPools.push(assetPoolAddress);
+        emit AssetPoolCreated(msg.sender, assetPoolAddress, _bondValue);
     }
 
     function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, 
@@ -69,7 +94,7 @@ contract BondNFTManager is Ownable {
                                                 _audiusArtistId,_fundingAmount, _numberOfYears,
                                                 _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
         userBondConfigs[msg.sender].push(_config);
-        bondNfts.push(nftAddress);
+        allBondNfts.push(nftAddress);
         emit BondNFTCreated(msg.sender,nftAddress,_artistId,_bondName,_bondSymbol);
     }
 
@@ -77,6 +102,14 @@ contract BondNFTManager is Ownable {
         BondNFT bondNFT = BondNFT(_nftAddress);
         bondNFT.mintBonds();
         emit BondNFTMinted(_nftAddress,bondNFT.totalSupply());
+    }
+
+    function allAssetPoolsLength() external view returns (uint256) {
+        return allAssetPools.length;
+    }
+
+    function allNftLength() external view returns (uint256) {
+        return allBondNfts.length;
     }
 
 
