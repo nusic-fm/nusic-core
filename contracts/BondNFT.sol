@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./ChainlinkOracleInfo.sol";
+import "./ChainlinkMetadataRequest.sol";
+
 
 contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
     using Strings for string;
@@ -26,13 +28,20 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
     uint256 public totalListeners;
     bytes32 private requestId;
 
+    // URI to be used before Reveal
+    string public defaultURI;
+    string public baseURI;
+
     event ListenerRequestInitiated(bytes32 indexed _requestId, address indexed nftAddress);
     event RequestListenerFulfilled(bytes32 indexed _requestId, uint256 indexed _listeners, address indexed nftAddress);
 
     ChainlinkOracleInfo private chainlinkOracleInfo;
+    ChainlinkMetadataRequest private chainlinkMetadataRequest;
+    bytes32 private metadataRequestId;
     
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, address _chainlinkMetadataRequestAddress) ERC721(_name, _symbol) {
         setPublicChainlinkToken();
+        chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
     }
 
     function initialize(string memory _artistName, string memory _artistId, string memory _channelId, 
@@ -50,6 +59,7 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         faceValue = _facevalue;
         chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
         getLatestListeners();
+        requestMetadataURI(); // This function call be done any of two places one is here and another one is in 'mindBonds' function, depnding on requirement
     }
 
     function mintBonds() public onlyOwner {
@@ -57,6 +67,10 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
             _safeMint(msg.sender, totalSupply);
             totalSupply++;
         }
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
     }
     
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
@@ -71,10 +85,18 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         _setTokenURI(tokenId, _tokenURI);
     }
 
+    function requestMetadataURI() private {
+        metadataRequestId = chainlinkMetadataRequest.getMetadataURI(address(this));
+    }
+    
+    function requestMetadataURIFulFill(bytes32 _requestId, string memory _metadataURI) public {
+        require(metadataRequestId == _requestId, "Metadata Request Not Matched");
+        baseURI = _metadataURI;
+    }
+
     function updateTotalListeners(uint256 _listeners) public {
         totalListeners = _listeners;
     }
-
 
     function getLatestListeners() public returns (bytes32) {
         Chainlink.Request memory request = buildChainlinkRequest(chainlinkOracleInfo.getJobId(), address(this), this.fulfill.selector);
