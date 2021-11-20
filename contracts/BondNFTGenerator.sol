@@ -7,8 +7,8 @@ import "./BondNFT.sol";
 
 contract BondNFTGenerator is Ownable {
 
-    function generateNFT(string memory _bondName, string memory _bondSymbol) public returns(address) {
-        BondNFT nft = new BondNFT(_bondName, _bondSymbol);
+    function generateNFT(string memory _bondName, string memory _bondSymbol, address _chainlinkMetadataRequestAddress) public returns(address) {
+        BondNFT nft = new BondNFT(_bondName, _bondSymbol,_chainlinkMetadataRequestAddress);
         return address(nft);
     }
     /*

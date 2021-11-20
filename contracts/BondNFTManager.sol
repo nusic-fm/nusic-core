@@ -8,6 +8,7 @@ import "./BondNFTGenerator.sol";
 import "./ChainlinkOracleInfo.sol";
 import "./BondNFT.sol";
 import "./AssetPool.sol";
+import "./ChainlinkMetadataRequest.sol";
 
 contract BondNFTManager is Ownable {
 
@@ -17,6 +18,7 @@ contract BondNFTManager is Ownable {
     RatingEngine private ratingEngine;
     BondNFTGenerator private bondNFTGenerator;
     ChainlinkOracleInfo private chainlinkOracleInfo;
+    ChainlinkMetadataRequest private chainlinkMetadataRequest;
 
     struct BondConfig {
         string artistName;
@@ -64,10 +66,11 @@ contract BondNFTManager is Ownable {
         uint256 bondValue
     );
 
-    function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkOracleInfoAddress) public onlyOwner {
+    function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkOracleInfoAddress, address _chainlinkMetadataRequestAddress) public onlyOwner {
         ratingEngine = RatingEngine(_ratingEngine);
         bondNFTGenerator = BondNFTGenerator(_bondNftGenerator);
         chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
+        chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
     }
 
     function createAssetPool(uint256 _bondValue) public returns(address assetPoolAddress) {
@@ -85,7 +88,7 @@ contract BondNFTManager is Ownable {
                         uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
                         string memory _bondSymbol, address _assetPoolAddress) public returns(address nftAddress) {
         
-        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol);
+        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkMetadataRequest));
         BondNFT bondNFT = BondNFT(nftAddress);
         bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont,
                             _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds,
