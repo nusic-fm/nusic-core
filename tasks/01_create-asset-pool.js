@@ -1,4 +1,3 @@
-
 task("create-asset-pool")
   .addParam("contract","Contract Address")
   .setAction(async taskArgs=>{
