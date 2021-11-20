@@ -26,7 +26,7 @@ contract BondNFT is ERC721URIStorage, Ownable {
     uint256 public totalListeners;
 
     // URI to be used before Reveal
-    string public defaultURI;
+    string public defaultURI = "ipfs://QmUNYMorLY9y15eYYZDXxTbdQPAXWqC3MwMm4Jtuz7SsxA";
     string public baseURI;
 
     ChainlinkOracleInfo private chainlinkOracleInfo;
@@ -34,13 +34,14 @@ contract BondNFT is ERC721URIStorage, Ownable {
     bytes32 private metadataRequestId;
     bytes32 private listenersRequestId;
     
-    constructor(string memory _name, string memory _symbol, address _chainlinkMetadataRequestAddress) ERC721(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, address _chainlinkOracleInfoAddress, address _chainlinkMetadataRequestAddress) ERC721(_name, _symbol) {
+        chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
         chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
     }
 
     function initialize(string memory _artistName, string memory _artistId, string memory _channelId, 
                 string memory _endpoint, string memory _audiusArtistId, uint256 _fundingAmount, 
-                uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue, address _chainlinkOracleInfoAddress) public {
+                uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue) public {
         artistName = _artistName;
         artistId = _artistId;
         channelId = _channelId;
@@ -51,7 +52,7 @@ contract BondNFT is ERC721URIStorage, Ownable {
         numberOfBonds = _numberOfBonds;
         issuerAddress = msg.sender;
         faceValue = _facevalue;
-        chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
+        
         requestLatestListeners();
         requestMetadataURI(); // This function call be done any of two places one is here and another one is in 'mindBonds' function, depnding on requirement
     }
@@ -79,6 +80,15 @@ contract BondNFT is ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, _tokenURI);
     }
 
+    function requestLatestListeners() private {
+        listenersRequestId = chainlinkOracleInfo.getLatestListeners(address(this));
+    }
+    
+    function requestLatestListenersFulFill(bytes32 _requestId, uint256 _listeners) public {
+        require(listenersRequestId == _requestId, "Listeners Request Not Matched");
+        totalListeners = _listeners;
+    }
+
     function requestMetadataURI() private {
         metadataRequestId = chainlinkMetadataRequest.getMetadataURI(address(this));
     }
@@ -88,13 +98,4 @@ contract BondNFT is ERC721URIStorage, Ownable {
         baseURI = _metadataURI;
     }
 
-    function requestLatestListeners() private {
-        listenersRequestId = chainlinkOracleInfo.getLatestListeners(address(this));
-    }
-    
-    function requestLatestListenersFulFill(bytes32 _requestId, uint256 _listeners) public {
-        require(listenersRequestId == _requestId, "Listeners Request Not Matched");
-        totalListeners = _listeners;
-    }
-    
 }

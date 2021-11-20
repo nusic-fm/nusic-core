@@ -88,11 +88,11 @@ contract BondNFTManager is Ownable {
                         uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
                         string memory _bondSymbol, address _assetPoolAddress) public returns(address nftAddress) {
         
-        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkMetadataRequest));
+        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkOracleInfo), address(chainlinkMetadataRequest));
         BondNFT bondNFT = BondNFT(nftAddress);
         bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont,
                             _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds,
-                            _facevalue, address(chainlinkOracleInfo));
+                            _facevalue);
         
         BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,
                                                 _audiusArtistId,_fundingAmount, _numberOfYears,
