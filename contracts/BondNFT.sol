@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -9,9 +8,8 @@ import "./ChainlinkOracleInfo.sol";
 import "./ChainlinkMetadataRequest.sol";
 
 
-contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
+contract BondNFT is ERC721URIStorage, Ownable {
     using Strings for string;
-    using Chainlink for Chainlink.Request;
 
     uint256 public totalSupply;
 
@@ -26,21 +24,17 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
     address public issuerAddress;
     uint256 public faceValue;
     uint256 public totalListeners;
-    bytes32 private requestId;
 
     // URI to be used before Reveal
     string public defaultURI;
     string public baseURI;
 
-    event ListenerRequestInitiated(bytes32 indexed _requestId, address indexed nftAddress);
-    event RequestListenerFulfilled(bytes32 indexed _requestId, uint256 indexed _listeners, address indexed nftAddress);
-
     ChainlinkOracleInfo private chainlinkOracleInfo;
     ChainlinkMetadataRequest private chainlinkMetadataRequest;
     bytes32 private metadataRequestId;
+    bytes32 private listenersRequestId;
     
     constructor(string memory _name, string memory _symbol, address _chainlinkMetadataRequestAddress) ERC721(_name, _symbol) {
-        setPublicChainlinkToken();
         chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
     }
 
@@ -58,7 +52,7 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         issuerAddress = msg.sender;
         faceValue = _facevalue;
         chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
-        getLatestListeners();
+        requestLatestListeners();
         requestMetadataURI(); // This function call be done any of two places one is here and another one is in 'mindBonds' function, depnding on requirement
     }
 
@@ -94,24 +88,13 @@ contract BondNFT is ERC721URIStorage, ChainlinkClient, Ownable {
         baseURI = _metadataURI;
     }
 
-    function updateTotalListeners(uint256 _listeners) public {
-        totalListeners = _listeners;
+    function requestLatestListeners() private {
+        listenersRequestId = chainlinkOracleInfo.getLatestListeners(address(this));
     }
-
-    function getLatestListeners() public returns (bytes32) {
-        Chainlink.Request memory request = buildChainlinkRequest(chainlinkOracleInfo.getJobId(), address(this), this.fulfill.selector);
-        
-        request.add("id", channelId);
-        request.add("endpoint", endpoint);
-
-        requestId = sendChainlinkRequestTo(chainlinkOracleInfo.getOracle(), request, chainlinkOracleInfo.getFee());
-        emit ListenerRequestInitiated(requestId, address(this)); 
-        return requestId; 
-    }
-
-    function fulfill(bytes32 _requestId, uint256 _listeners) public recordChainlinkFulfillment(_requestId) {
+    
+    function requestLatestListenersFulFill(bytes32 _requestId, uint256 _listeners) public {
+        require(listenersRequestId == _requestId, "Listeners Request Not Matched");
         totalListeners = _listeners;
-        emit RequestListenerFulfilled(_requestId, _listeners, address(this));
     }
     
 }
