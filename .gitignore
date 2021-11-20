@@ -2,6 +2,7 @@ node_modules
 .env
 
 #Hardhat files
+build
 cache
 artifacts
 typechain
