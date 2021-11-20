@@ -4,8 +4,13 @@ import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import dotenv from 'dotenv';
 import "./tasks/set-greeting";
-import "./tasks/read-greeting";
+import "./tasks/01_create-asset-pool";
+import "./tasks/02_read-asset-pool";
+import "./tasks/03_issue-nft-bond";
+import "./tasks/04_verify-nft-creation";
+import "./tasks/05_verify-nft-bond";
 import 'hardhat-contract-sizer';
+import "@appliedblockchain/chainlink-plugins-fund-link";
 
 dotenv.config();
 
