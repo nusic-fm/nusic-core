@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./ChainlinkOracleInfo.sol";
 import "./ChainlinkMetadataRequest.sol";
 
-
-contract BondNFT is ERC721URIStorage, Ownable {
+contract BondNFT is ERC721, Ownable {
     using Strings for string;
+    using Strings for uint256;
 
     uint256 public totalSupply;
 
@@ -67,17 +67,10 @@ contract BondNFT is ERC721URIStorage, Ownable {
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
-    
-    function getTokenURI(uint256 tokenId) public view returns (string memory) {
-        return tokenURI(tokenId);
-    }
 
-    function setTokenURI(uint256 tokenId, string memory _tokenURI) public onlyOwner{
-        require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721: transfer caller is not owner nor approved"
-        );
-        _setTokenURI(tokenId, _tokenURI);
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(_exists(tokenId), "Token does not exists");
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString(),".json")) : defaultURI;
     }
 
     function requestLatestListeners() private {
