@@ -25,7 +25,7 @@ npx hardhat create-asset-pool --contract < BondNFTManager Address > --network ko
 
 #### Read Asset Pool Details
 ```shell
-npx hardhat read-asset-pool --contract < BondNFTManager Address > --network kovan
+npx hardhat read-asset-pool --contract < BondNFTManager Address > --asset-pool-creator-address < Asset pool creator Address > --network kovan
 ```
 
 #### Issue NFT Bond
@@ -35,7 +35,7 @@ npx hardhat issue-nft-bond --contract < BondNFTManager Address > --asset-pool-ad
 
 #### Verify Bond Creation
 ```shell
-npx hardhat verify-nft-creation --bond-contract-address < BondNFTManager Address > --nft-index 0 --network kovan
+npx hardhat verify-nft-creation --nft-manager-contract-address < BondNFTManager Address >  --nft-creator-address < Bond NFT creator Address > --network kovan
 ```
 
 #### Verify Bond Details which will be updated from Chainlink Oracle
