@@ -1,17 +1,24 @@
 task("verify-nft-creation")
-  .addParam("bondContractAddress","Contract Address")
-  .addParam("nftIndex","Bond NFT Index")
+  .addParam("nftManagerContractAddress","Contract Address")
+  .addParam("nftCreatorAddress","Bond NFT creator Address")
   .setAction(async taskArgs=>{
     const [owner] = await ethers.getSigners();
-    const bondNFTManagerAddress = taskArgs.bondContractAddress;
-    const nftIndex = parseInt(taskArgs.nftIndex);
+    const nftManagerContractAddress = taskArgs.nftManagerContractAddress;
+    const nftCreatorAddress = taskArgs.nftCreatorAddress;
     const BondNFTManager = await ethers.getContractFactory("BondNFTManager");
-    const bondNFTManager = await BondNFTManager.attach(bondNFTManagerAddress);
+    const bondNFTManager = await BondNFTManager.attach(nftManagerContractAddress);
 
+    //this will not work as expected
+    //const bondNFTAddress = await bondNFTManager.allBondNfts(parseInt(nftIndex));
+    //console.log("bondNFTAddress = ",bondNFTAddress);
 
-    const bondNFTAddress = await bondNFTManager.allBondNfts(parseInt(nftIndex));
-    console.log("bondNFTAddress = ",bondNFTAddress);
-
-    const bondNFTInfo = await bondNFTManager.userBondConfigs(await owner.getAddress(),nftIndex);
-    console.log("bondNFTInfo = ",bondNFTInfo.toString());
+    const bondNftCount = (await bondNFTManager.nftBondLengthForUser(nftCreatorAddress)).toNumber();
+    console.log(`BondNFT Count is ${bondNftCount} for user ${nftCreatorAddress}`);
+    for(let i=0;i<bondNftCount;i++){
+      const bondNFTConfig = await bondNFTManager.userBondConfigs(nftCreatorAddress,i);
+      console.log("Counter = ",i);
+      console.log("bondNFTConfig.toString = ",bondNFTConfig.toString());
+      console.log("bondNFTConfig = ",bondNFTConfig);
+      console.log("==========");
+    }
 });
