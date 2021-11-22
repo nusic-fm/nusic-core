@@ -9,6 +9,7 @@ import "./ChainlinkOracleInfo.sol";
 import "./BondNFT.sol";
 import "./AssetPool.sol";
 import "./ChainlinkMetadataRequest.sol";
+import "hardhat/console.sol";
 
 contract BondNFTManager is Ownable {
 
@@ -87,21 +88,32 @@ contract BondNFTManager is Ownable {
                         string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears,
                         uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
                         string memory _bondSymbol, address _assetPoolAddress) public returns(address nftAddress) {
+        console.log("Issue Bond Started");
         
         nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkOracleInfo), address(chainlinkMetadataRequest));
+        console.log("bondNFTGenerator.generateNFT done = ",nftAddress);
+        
         BondNFT bondNFT = BondNFT(nftAddress);
         bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont,
                             _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds,
                             _facevalue);
+        console.log("bondNFT.initialize done");
         
         BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,
                                                 _audiusArtistId,_fundingAmount, _numberOfYears,
                                                 _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
+        console.log("BondConfig done"); 
         userBondConfigs[msg.sender].push(_config);
+        console.log("userBondConfigs pushed BondConfig done"); 
         allBondNfts.push(nftAddress);
+        console.log("allBondNfts pushed nftAddress done"); 
+        
         AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,_assetPoolAddress);
+        console.log("AssetPoolInfo accessed ",assetPoolInfo.assetPoolAddress); 
         assetPoolInfo.bondNftAddress = nftAddress;
         emit BondNFTCreated(msg.sender,nftAddress,_artistId,_bondName,_bondSymbol);
+        console.log("BondNFTCreated event emitted done"); 
+        
     }
 
     function getAssetPoolInfo(address _artist, address _assetPoolAddress) private view returns(AssetPoolInfo memory) {
@@ -126,6 +138,14 @@ contract BondNFTManager is Ownable {
 
     function allNftLength() external view returns (uint256) {
         return allBondNfts.length;
+    }
+
+    function assetPoolsLengthForUser(address _creatorAddress) external view returns (uint256) {
+        return userAssetPools[_creatorAddress].length;
+    }
+
+    function nftBondLengthForUser(address _creatorAddress) external view returns (uint256) {
+        return userBondConfigs[_creatorAddress].length;
     }
 
 

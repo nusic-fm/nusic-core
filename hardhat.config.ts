@@ -9,6 +9,7 @@ import "./tasks/02_read-asset-pool";
 import "./tasks/03_issue-nft-bond";
 import "./tasks/04_verify-nft-creation";
 import "./tasks/05_verify-nft-bond";
+import "./tasks/06_mint-nft";
 import 'hardhat-contract-sizer';
 import "@appliedblockchain/chainlink-plugins-fund-link";
 
