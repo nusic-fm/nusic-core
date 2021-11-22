@@ -57,7 +57,7 @@ contract BondNFT is ERC721, Ownable {
         requestMetadataURI(); // This function call be done any of two places one is here and another one is in 'mindBonds' function, depnding on requirement
     }
 
-    function mintBonds() public onlyOwner {
+    function mintBonds() public {
         for(uint16 i=0; i<numberOfBonds; i++) {
             _safeMint(msg.sender, totalSupply);
             totalSupply++;
