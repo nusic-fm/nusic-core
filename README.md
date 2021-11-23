@@ -43,8 +43,20 @@ npx hardhat verify-nft-creation --nft-manager-contract-address < BondNFTManager 
 npx hardhat verify-nft-bond --bond-contract-address < Bond NFT Address received in previous address > --network kovan
 ```
 
+#### Mint Tokens for Particular NFT Bond
+```shell
+npx hardhat mint-nft --nft-manager-address < BondNFTManager Address > --nft-bond-address <Bond NFT Token Address> --network kovan
+```
 
+#### Read Bond NFT Details
+```shell
+npx hardhat read-token-details --nft-bond-address <Bond NFT Token Address> --network kovan
+```
 
+#### Set Base URI for NFT Bond Metadata
+```shell
+npx hardhat set-token-uri --nft-bond-address <Bond NFT Token Address> --network kovan
+```
 
 For TypeScript Configuration use this [link](https://hardhat.org/guides/typescript.html)
 
