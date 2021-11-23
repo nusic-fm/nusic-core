@@ -11,7 +11,7 @@ task("verify-nft-creation")
     //this will not work as expected
     //const bondNFTAddress = await bondNFTManager.allBondNfts(parseInt(nftIndex));
     //console.log("bondNFTAddress = ",bondNFTAddress);
-
+    const BondNFT = await ethers.getContractFactory("BondNFT");
     const bondNftCount = (await bondNFTManager.nftBondLengthForUser(nftCreatorAddress)).toNumber();
     console.log(`BondNFT Count is ${bondNftCount} for user ${nftCreatorAddress}`);
     for(let i=0;i<bondNftCount;i++){
@@ -19,6 +19,10 @@ task("verify-nft-creation")
       console.log("Counter = ",i);
       console.log("bondNFTConfig.toString = ",bondNFTConfig.toString());
       console.log("bondNFTConfig = ",bondNFTConfig);
-      console.log("==========");
+      console.log("+++++++++");
+      const bondNFT = await BondNFT.attach(bondNFTConfig.nftAddress);
+      const owner = (await bondNFT.owner());
+      console.log("NFT Bond Owner = ",owner);
+      console.log("===================");
     }
 });

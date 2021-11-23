@@ -11,10 +11,10 @@ async function main() {
 
 
   const ChainlinkOracleInfo:ChainlinkOracleInfo__factory = await ethers.getContractFactory("ChainlinkOracleInfo");
-  const chainlinkOracleInfo:ChainlinkOracleInfo = await ChainlinkOracleInfo.attach("0xDAccf5a4636c745c796182dCA912546f15C80133");
+  const chainlinkOracleInfo:ChainlinkOracleInfo = await ChainlinkOracleInfo.attach("0xBE830E4fd86f81Ce0D8A1aC1091FfE802122C05C");
   
   const ChainlinkMetadataRequest:ChainlinkMetadataRequest__factory = await ethers.getContractFactory("ChainlinkMetadataRequest");
-  const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.attach("0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81");
+  const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.attach("0x84F1B27A0F47Bab3840d736E4bb49072c2fC1675");
 
   await fundLink(hre,chainlinkOracleInfo.address, "10000000000000000000"); // 10 link token
   console.log("ChainlinkOracleInfo funded!!");

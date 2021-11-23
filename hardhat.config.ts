@@ -10,6 +10,8 @@ import "./tasks/03_issue-nft-bond";
 import "./tasks/04_verify-nft-creation";
 import "./tasks/05_verify-nft-bond";
 import "./tasks/06_mint-nft";
+import "./tasks/07_nft-token-read";
+import "./tasks/08_nft-token-set-uri";
 import 'hardhat-contract-sizer';
 import "@appliedblockchain/chainlink-plugins-fund-link";
 
@@ -50,6 +52,9 @@ export default {
     sources: "contracts",
   },
   networks: {
+    localhost: {
+      url:' http://127.0.0.1:8545/'
+    },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${INFURA_KEY}`,
       accounts: [`0x${ROPSTEN_PRIVATE_KEY}`]
