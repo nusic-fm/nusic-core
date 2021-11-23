@@ -1,11 +1,11 @@
 # NUSIC Core Contracts
 
 ## Deployed Addresses on Kovan
-RatingEngine deployed to: 0xd2A3BF5f8B9F9fD1aF81b1BA47A896e562Aa28D1 <br>
-ChainlinkOracleInfo deployed to: 0xDAccf5a4636c745c796182dCA912546f15C80133 <br>
-ChainlinkMetadataRequest deployed to: 0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81 <br>
-BondNFTGenerator deployed to: 0x0F4763d3652aFB7d061909C5080ee9323b292540 <br>
-BondNFTManager deployed to: 0x4cC90cb0217C13AF94f90ce3a79BfF68c92f68EB <br>
+RatingEngine deployed to: 0x3EA4b78bc6bcbC9F2476288c32cf3E1396D48fb6 <br>
+ChainlinkOracleInfo deployed to: 0xBE830E4fd86f81Ce0D8A1aC1091FfE802122C05C <br>
+ChainlinkMetadataRequest deployed to: 0x84F1B27A0F47Bab3840d736E4bb49072c2fC1675 <br>
+BondNFTGenerator deployed to: 0x917555471C809720E8bbd31352676662d7c8b088 <br>
+BondNFTManager deployed to: 0xd0bF81468bE0c2a8e247d101b6b71F7E18E24907 <br>
 
 #### Deploy All Contracts
 ```shell

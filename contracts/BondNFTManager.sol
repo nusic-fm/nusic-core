@@ -49,9 +49,8 @@ contract BondNFTManager is Ownable {
     address[] public allAssetPools;
     
     event BondNFTCreated(
-        address indexed issuerAddress,
-        address indexed bondNftAddress,
-        string indexed artistId,
+        address issuerAddress,
+        address bondNftAddress,
         string name,
         string symbol
     );
@@ -111,7 +110,7 @@ contract BondNFTManager is Ownable {
         AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,_assetPoolAddress);
         console.log("AssetPoolInfo accessed ",assetPoolInfo.assetPoolAddress); 
         assetPoolInfo.bondNftAddress = nftAddress;
-        emit BondNFTCreated(msg.sender,nftAddress,_artistId,_bondName,_bondSymbol);
+        emit BondNFTCreated(msg.sender,nftAddress,_bondName,_bondSymbol);
         console.log("BondNFTCreated event emitted done"); 
         
     }
@@ -128,7 +127,7 @@ contract BondNFTManager is Ownable {
 
     function mintNFTBond(address _nftAddress) public {
         BondNFT bondNFT = BondNFT(_nftAddress);
-        bondNFT.mintBonds();
+        bondNFT.mintBonds(msg.sender);
         emit BondNFTMinted(_nftAddress,bondNFT.totalSupply());
     }
 
