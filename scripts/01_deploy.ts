@@ -7,7 +7,7 @@ async function main() {
   const oracleAddress = "0xcE4452C43390842bE32B45964945276A78985E88";
   const listenersJobId = "a90ac9049d3b4f5abcb315ff1a3a367a";
   const fee = "1000000000000000000"; // 1 Link token
-  const metadataJobId = "a90ac9049d3b4f5abcb315ff1a3a367a"; // This needs to be changed for right api access
+  const metadataJobId = "b8ec9aad02804ce098397a731b26c7c3"; // This needs to be changed for right api access
 
   
   const RatingEngine:RatingEngine__factory = await ethers.getContractFactory("RatingEngine");
