@@ -11,6 +11,7 @@ contract RatingEngine is Ownable {
 
     
     uint256 public riskPremium;
+    bytes32 public data;
 
     function setRiskPremium(uint256 _riskPremium) public onlyOwner() {
         riskPremium = _riskPremium;
@@ -74,6 +75,8 @@ contract RatingEngine is Ownable {
     function calculateDelayedQuarters(uint256 _expectedNextPaymentBlock) private view returns (uint256){
         uint256 blockDifference = block.number - _expectedNextPaymentBlock;
         uint256 quarterlyBlocks = 518400;
+        // 1 will show that delay in within 1 quarter
+        // 2 will show that delay is more than 1 quarter
         return  (blockDifference <= quarterlyBlocks)? 1 : 2;
     }
 
@@ -86,6 +89,62 @@ contract RatingEngine is Ownable {
 
 
     function calculateRating(uint256 _totalListeners,bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory){
-        return "AAA";
+        if(_totalListeners >= 5000000) {
+            return ratingForTier1Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
+        }
+        else if(_totalListeners >= 500000 && _totalListeners <= 4999999) {
+            return ratingForTier2Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
+        }
+        else if(_totalListeners >= 0 && _totalListeners <= 499999){
+            return ratingForTier3Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
+        }
+        return "D";
     }
+
+    //For 5 million or more
+    function ratingForTier1Category(bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory){
+        if(_isOvercollateralized){
+            return "AAA";
+        }
+        else if(_isCollateralUpToDate) {
+            return "BBB";
+        }
+        else if(_numberOfQuarterDelayed == 1) {
+            return "CCC";
+        }
+        else {
+            return "D";
+        }
+    }
+
+    //For 500,000 - 4,999,999
+    function ratingForTier2Category(bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory) {
+        if(_isOvercollateralized){
+            return "AA";
+        }
+        else if(_isCollateralUpToDate) {
+            return "BB";
+        }
+        else if(_numberOfQuarterDelayed == 1) {
+            return "CC";
+        }
+        else {
+            return "D";
+        }
+    }
+    //For 0 - 499,999
+    function ratingForTier3Category(bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory) {
+        if(_isOvercollateralized){
+            return "A";
+        }
+        else if(_isCollateralUpToDate) {
+            return "B";
+        }
+        else if(_numberOfQuarterDelayed == 1) {
+            return "C";
+        }
+        else {
+            return "D";
+        }
+    }  
 }
