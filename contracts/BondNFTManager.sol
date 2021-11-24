@@ -110,6 +110,8 @@ contract BondNFTManager is Ownable {
         AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,_assetPoolAddress);
         console.log("AssetPoolInfo accessed ",assetPoolInfo.assetPoolAddress); 
         assetPoolInfo.bondNftAddress = nftAddress;
+        AssetPool assetPool = AssetPool(payable(_assetPoolAddress));
+        assetPool.initializeBondInfo(_numberOfYears, nftAddress);
         emit BondNFTCreated(msg.sender,nftAddress,_bondName,_bondSymbol);
         console.log("BondNFTCreated event emitted done"); 
         
