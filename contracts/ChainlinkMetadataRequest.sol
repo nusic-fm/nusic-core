@@ -48,7 +48,7 @@ contract ChainlinkMetadataRequest is ChainlinkClient, Ownable {
         BondNFT _bondNFT = BondNFT(_nftAddress);
         request.add("id", _bondNFT.channelId());
         request.add("endpoint", _bondNFT.endpoint());
-        //request.add("nftaddress", _nftAddress);
+        request.add("nftaddress", toString(_nftAddress));
 
         bytes32 requestId = sendChainlinkRequestTo(oracle, request, fee);
         requestToSender[requestId] = msg.sender;
@@ -65,6 +65,22 @@ contract ChainlinkMetadataRequest is ChainlinkClient, Ownable {
         emit MetadataURIRequestFulfilled(_requestId, _nftAddress ,_metadataURI);
     }
 
+    function toString(address account) internal pure returns(string memory) {
+        return toString(abi.encodePacked(account));
+    }
+  
+    function toString(bytes memory data) internal pure returns(string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+    
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint i = 0; i < data.length; i++) {
+            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
+    }
 
     function stringToBytes32(string memory source) private pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
