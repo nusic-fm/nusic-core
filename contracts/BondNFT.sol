@@ -4,8 +4,9 @@ pragma solidity >=0.4.22 <0.9.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "./ChainlinkOracleInfo.sol";
+import "./ChainlinkSpotifyListeners.sol";
 import "./ChainlinkMetadataRequest.sol";
+import "./ChainlinkYoutubeSubscribers.sol";
 
 contract BondNFT is ERC721, Ownable {
     using Strings for string;
@@ -23,25 +24,29 @@ contract BondNFT is ERC721, Ownable {
     uint256 public numberOfBonds; // Same as Max Supply
     address public issuerAddress;
     uint256 public faceValue;
-    uint256 public totalListeners;
+    uint256 public spotifyListeners;
+    uint256 public youtubeSubscribers;
 
     // URI to be used before Reveal
     string public defaultURI = "ipfs://QmUNYMorLY9y15eYYZDXxTbdQPAXWqC3MwMm4Jtuz7SsxA";
     string public baseURI;
 
-    ChainlinkOracleInfo private chainlinkOracleInfo;
+    ChainlinkSpotifyListeners private chainlinkSpotifyListeners;
     ChainlinkMetadataRequest private chainlinkMetadataRequest;
+    ChainlinkYoutubeSubscribers private chainlinkYoutubeSubscribers;
     bytes32 private metadataRequestId;
-    bytes32 private listenersRequestId;
+    bytes32 private spotifyListenersRequestId;
+    bytes32 private youtubeSubscribersRequestId;
     
-    constructor(string memory _name, string memory _symbol, address _chainlinkOracleInfoAddress, address _chainlinkMetadataRequestAddress) ERC721(_name, _symbol) {
-        chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
+    constructor(string memory _name, string memory _symbol, address _chainlinkSpotifyListenersAddress, address _chainlinkMetadataRequestAddress, address _chainlinkYoutubeSubscribersAddress) ERC721(_name, _symbol) {
+        chainlinkSpotifyListeners = ChainlinkSpotifyListeners(_chainlinkSpotifyListenersAddress);
         chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
+        chainlinkYoutubeSubscribers = ChainlinkYoutubeSubscribers(_chainlinkYoutubeSubscribersAddress);
     }
 
     function initialize(string memory _artistName, string memory _artistId, string memory _channelId, 
                 string memory _endpoint, string memory _audiusArtistId, uint256 _fundingAmount, 
-                uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue) public {
+                uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue, uint256 _spotifyListeners, uint256 _youtubeSubscribers) public {
         artistName = _artistName;
         artistId = _artistId;
         channelId = _channelId;
@@ -52,8 +57,11 @@ contract BondNFT is ERC721, Ownable {
         numberOfBonds = _numberOfBonds;
         issuerAddress = msg.sender;
         faceValue = _facevalue;
-        
-        requestLatestListeners();
+        spotifyListeners = _spotifyListeners;
+        youtubeSubscribers = _youtubeSubscribers;
+
+        requestLatestSpotifyListeners();
+        requestLatestYoutubeSubscribers();
         requestMetadataURI(); // This function call be done any of two places one is here and another one is in 'mindBonds' function, depnding on requirement
     }
 
@@ -77,19 +85,34 @@ contract BondNFT is ERC721, Ownable {
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString(),".json")) : defaultURI;
     }
 
-    function requestLatestListeners() private {
-        listenersRequestId = chainlinkOracleInfo.getLatestListeners(address(this));
+    // For Spotify Listeners Request
+    function requestLatestSpotifyListeners() public {
+        spotifyListenersRequestId = chainlinkSpotifyListeners.getLatestListeners(address(this));
     }
     
-    function requestLatestListenersFulFill(bytes32 _requestId, uint256 _listeners) public {
-        require(listenersRequestId == _requestId, "Listeners Request Not Matched");
-        totalListeners = _listeners;
+    // For Spotify Listeners Request FulFill
+    function requestLatestSpotifyListenersFulFill(bytes32 _requestId, uint256 _listeners) public {
+        require(spotifyListenersRequestId == _requestId, "Spotify Listeners Request Not Matched");
+        spotifyListeners = _listeners;
     }
 
-    function requestMetadataURI() private {
+    // For Youtube Subscribers Request
+    function requestLatestYoutubeSubscribers() public {
+        youtubeSubscribersRequestId = chainlinkYoutubeSubscribers.getLatestSubscribers(address(this));
+    }
+
+    // For Youtube Subscribers Request Fulfill
+    function requestLatestYoutubeSubscribersFulFill(bytes32 _requestId, uint256 _youtubeSubscribers) public {
+        require(youtubeSubscribersRequestId == _requestId, "Youtube Subscribers Request Not Matched");
+        youtubeSubscribers = _youtubeSubscribers;
+    }
+
+    // For Meatadata URI Request
+    function requestMetadataURI() public {
         metadataRequestId = chainlinkMetadataRequest.getMetadataURI(address(this));
     }
     
+    // For Meatadata URI Request
     function requestMetadataURIFulFill(bytes32 _requestId, string memory _metadataURI) public {
         require(metadataRequestId == _requestId, "Metadata Request Not Matched");
         baseURI = _metadataURI;

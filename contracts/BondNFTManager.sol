@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./RatingEngine.sol";
 import "./BondNFTGenerator.sol";
-import "./ChainlinkOracleInfo.sol";
+import "./ChainlinkSpotifyListeners.sol";
+import "./ChainlinkYoutubeSubscribers.sol";
 import "./BondNFT.sol";
 import "./AssetPool.sol";
 import "./ChainlinkMetadataRequest.sol";
@@ -18,8 +19,9 @@ contract BondNFTManager is Ownable {
     string private defaultEndpont = "channel";
     RatingEngine private ratingEngine;
     BondNFTGenerator private bondNFTGenerator;
-    ChainlinkOracleInfo private chainlinkOracleInfo;
+    ChainlinkSpotifyListeners private chainlinkSpotifyListeners;
     ChainlinkMetadataRequest private chainlinkMetadataRequest;
+    ChainlinkYoutubeSubscribers private chainlinkYoutubeSubscribers;
 
     struct BondConfig {
         string artistName;
@@ -66,11 +68,18 @@ contract BondNFTManager is Ownable {
         uint256 bondValue
     );
 
-    function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkOracleInfoAddress, address _chainlinkMetadataRequestAddress) public onlyOwner {
+    struct ListenersDetails {
+        uint256 spotifyListeners;
+        uint256 youtubeSubscribers;
+        address assetPoolAddress;
+    }
+
+    function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkSpotifyListenersAddress, address _chainlinkMetadataRequestAddress, address _chainlinkYoutubeSubscribersAddress) public onlyOwner {
         ratingEngine = RatingEngine(_ratingEngine);
         bondNFTGenerator = BondNFTGenerator(_bondNftGenerator);
-        chainlinkOracleInfo = ChainlinkOracleInfo(_chainlinkOracleInfoAddress);
+        chainlinkSpotifyListeners = ChainlinkSpotifyListeners(_chainlinkSpotifyListenersAddress);
         chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
+        chainlinkYoutubeSubscribers = ChainlinkYoutubeSubscribers(_chainlinkYoutubeSubscribersAddress);
     }
 
     function createAssetPool(uint256 _bondValue) public returns(address assetPoolAddress) {
@@ -86,16 +95,16 @@ contract BondNFTManager is Ownable {
     function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, 
                         string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears,
                         uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
-                        string memory _bondSymbol, address _assetPoolAddress) public returns(address nftAddress) {
+                        string memory _bondSymbol, /*address _assetPoolAddress,*/ ListenersDetails memory listenersDetails) public returns(address nftAddress) {
         console.log("Issue Bond Started");
         
-        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkOracleInfo), address(chainlinkMetadataRequest));
+        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkSpotifyListeners), address(chainlinkMetadataRequest), address(chainlinkYoutubeSubscribers));
         console.log("bondNFTGenerator.generateNFT done = ",nftAddress);
         
         BondNFT bondNFT = BondNFT(nftAddress);
         bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont,
                             _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds,
-                            _facevalue);
+                            _facevalue, listenersDetails.spotifyListeners, listenersDetails.youtubeSubscribers);
         console.log("bondNFT.initialize done");
         
         BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,
@@ -107,10 +116,10 @@ contract BondNFTManager is Ownable {
         allBondNfts.push(nftAddress);
         console.log("allBondNfts pushed nftAddress done"); 
         
-        AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,_assetPoolAddress);
+        AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,listenersDetails.assetPoolAddress);
         console.log("AssetPoolInfo accessed ",assetPoolInfo.assetPoolAddress); 
         assetPoolInfo.bondNftAddress = nftAddress;
-        AssetPool assetPool = AssetPool(payable(_assetPoolAddress));
+        AssetPool assetPool = AssetPool(payable(listenersDetails.assetPoolAddress));
         assetPool.initializeBondInfo(_numberOfYears, nftAddress);
         emit BondNFTCreated(msg.sender,nftAddress,_bondName,_bondSymbol);
         console.log("BondNFTCreated event emitted done"); 
