@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { ethers, run } from 'hardhat';
-import { BondNFTGenerator, BondNFTGenerator__factory, BondNFTManager, BondNFTManager__factory, ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkOracleInfo, ChainlinkOracleInfo__factory, RatingEngine, RatingEngine__factory } from '../typechain';
+import { BondNFTManager, BondNFTManager__factory, } from '../typechain';
 
 // This is only needed when we want to deploy BondNFTManager separately
 async function main() {
@@ -11,7 +11,7 @@ async function main() {
   console.log("BondNFTManager deployed to:", bondNFTManager.address);
 
   // Need to replace address of RatingEngine,BondNFTGenerator,ChainlinkOracleInfo,ChainlinkMetadataRequest in this same order
-  await bondNFTManager.initialize("0xd2A3BF5f8B9F9fD1aF81b1BA47A896e562Aa28D1", "0x0F4763d3652aFB7d061909C5080ee9323b292540", "0xDAccf5a4636c745c796182dCA912546f15C80133", "0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81");
+  await bondNFTManager.initialize("0xd2A3BF5f8B9F9fD1aF81b1BA47A896e562Aa28D1", "0x0F4763d3652aFB7d061909C5080ee9323b292540", "0xDAccf5a4636c745c796182dCA912546f15C80133", "0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81", "0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81");
   console.log("BondNFTManager Initialized");
 }
 
