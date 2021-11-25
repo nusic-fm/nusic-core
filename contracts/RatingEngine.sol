@@ -11,7 +11,7 @@ contract RatingEngine is Ownable {
 
     
     uint256 public riskPremium;
-    bytes32 public data;
+    uint256 public constant PRECISION = 1e18;
 
     function setRiskPremium(uint256 _riskPremium) public onlyOwner() {
         riskPremium = _riskPremium;
@@ -48,28 +48,21 @@ contract RatingEngine is Ownable {
         console.log("_bondValue ",_bondValue);
         console.log("_couponRate ",_couponRate);
         console.log("_numberOfQuarters ",_numberOfQuarters);
-        //console.log("(_couponRate/ 4 / 100) ",(_couponRate/ 4 / 100));
-        console.log("(_couponRate/ 4 / 100) ",((_couponRate * 100)/4));
-        //console.log("(_bondValue * (_couponRate/ 4 / 100)) ",(_bondValue * ((_couponRate * 100)/4)));
-        console.log("(_bondValue * ((_couponRate * 100)/4)) ",(_bondValue * ((_couponRate * 100)/4)));
-        console.log("(_bondValue * ((_couponRate * 100)/4)) ",((_bondValue * ((_couponRate * 100)/4)) / 100 /100));
+        console.log("(100*PRECISION)  ",(100*PRECISION) );
+        console.log("(_bondValue * _couponRate) ",(_bondValue * _couponRate));
+        
+        console.log("(_bondValue * _couponRate) / (100*PRECISION) ",(_bondValue * _couponRate) / (100*PRECISION));
+        console.log("((_bondValue * _couponRate) / (100*PRECISION) / 4 ) ",((_bondValue * _couponRate) / (100*PRECISION) / 4 ));
         
         // This is how we normally do but in our case this will not work
         //totalYield = (_bondValue * (_couponRate/ 4 / 100)) * _numberOfQuarters;
 
-        // we need coupon rate in basis points
-        totalYield = ((_bondValue * ((_couponRate * 100)/4)) / 100 / 100) * _numberOfQuarters;
+        totalYield = ((_bondValue * _couponRate) / (100*PRECISION) / 4 ) * _numberOfQuarters;
         console.log("Total yield ",totalYield);
     }
 
-    // For now we are using hardcode value, we will fetch from chainlink pricefeed
-    // And later on we will move to DAI to keep value stable
-    function getEThPrice() private pure returns(uint256){
-        return 4000;
-    }
-
     function isOvercollateralized (uint256 _assetPoolBalance,  uint256 _totalValueWithInterest) private pure returns(bool) {
-        return ((_assetPoolBalance * getEThPrice()) /(10**18))  >= _totalValueWithInterest;
+        return _assetPoolBalance >= _totalValueWithInterest;
     }
 
     function calculateDelayedQuarters(uint256 _expectedNextPaymentBlock) private view returns (uint256){
@@ -80,10 +73,29 @@ contract RatingEngine is Ownable {
         return  (blockDifference <= quarterlyBlocks)? 1 : 2;
     }
 
+    // Temporary funciton, will be removed
     function checkAssetPoolBalance(address _assetPoolAddress) public view returns (uint256){
         console.log("Asset Pool Balance = ",_assetPoolAddress.balance);
         console.log("1 = ",(_assetPoolAddress.balance * 4000));
         console.log("2 = ",((_assetPoolAddress.balance * 4000) / (10**18)));
+        
+        uint256 cop = 2;
+        uint256 copVal = cop * 1e18;
+        uint256 percentDivider = 100 * (1e18); //1.0755
+
+        uint256 amount = _assetPoolAddress.balance * 4000;
+        uint256 amountP = amount * copVal;
+        uint256 amountP1 = amount * copVal / percentDivider;
+
+        console.log("3 = ",cop);
+        console.log("4 = ",copVal);
+        console.log("5 = ",percentDivider);
+        console.log("6 = ",amount);
+        console.log("7 = ",amountP);
+        console.log("8 = ",amountP1);
+        
+        console.log("9 = ",PRECISION);
+        
         return _assetPoolAddress.balance;
     }
 
@@ -146,5 +158,5 @@ contract RatingEngine is Ownable {
         else {
             return "D";
         }
-    }  
+    } 
 }
