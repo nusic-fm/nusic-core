@@ -110,7 +110,7 @@ contract RatingEngine is Ownable {
         else if(_totalListeners >= 0 && _totalListeners <= 499999){
             return ratingForTier3Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
         }
-        return "D";
+        return "R";
     }
 
     //For 5 million or more
@@ -119,13 +119,13 @@ contract RatingEngine is Ownable {
             return "AAA";
         }
         else if(_isCollateralUpToDate) {
-            return "BBB";
+            return "III";
         }
         else if(_numberOfQuarterDelayed == 1) {
-            return "CCC";
+            return "UUU";
         }
         else {
-            return "D";
+            return "R";
         }
     }
 
@@ -135,13 +135,13 @@ contract RatingEngine is Ownable {
             return "AA";
         }
         else if(_isCollateralUpToDate) {
-            return "BB";
+            return "II";
         }
         else if(_numberOfQuarterDelayed == 1) {
-            return "CC";
+            return "UU";
         }
         else {
-            return "D";
+            return "R";
         }
     }
     //For 0 - 499,999
@@ -150,13 +150,13 @@ contract RatingEngine is Ownable {
             return "A";
         }
         else if(_isCollateralUpToDate) {
-            return "B";
+            return "I";
         }
         else if(_numberOfQuarterDelayed == 1) {
-            return "C";
+            return "U";
         }
         else {
-            return "D";
+            return "R";
         }
     } 
 }
