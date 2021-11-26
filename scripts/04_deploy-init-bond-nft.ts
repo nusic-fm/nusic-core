@@ -17,8 +17,8 @@ async function main() {
   console.log("BondNFT deployed to:", bondNFT.address);
 
   
-  const txt = await bondNFT.initialize("Howie B","howie_b","UCOmHUn--16B90oW2L6FRR3Ab","channel",
-                                  "audiusArtistId",BigNumber.from("1000"),BigNumber.from("3"),
+  const txt = await bondNFT.initialize("Howie B","howie_b","UCOmHUn--16B90oW2L6FRR3Ab",
+                                  BigNumber.from("1000"),BigNumber.from("3"),
                                   BigNumber.from("10"),BigNumber.from("2000"), 
                                   BigNumber.from("55000"),BigNumber.from("560"));
   console.log("BondNFT Initialized");
