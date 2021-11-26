@@ -25,7 +25,7 @@ async function main() {
   // Uncomment only to attach existing AssetPool
   //const assetPool:AssetPool = await AssetPool.attach("0x610178dA211FEF7D417bC0e6FeD39F05609AD788");
   const BondNFT:BondNFT__factory = await ethers.getContractFactory("BondNFT");
-  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0xDAccf5a4636c745c796182dCA912546f15C80133","0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81","0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81");
+  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64","0x89dBffB9342b113B0bd4CBCBD128A807af846a6E","0xF1Ff48cE1027a132F5Daf942ffC040a366b906C8");
   await bondNFT.deployed();
   
   // Uncomment only to attach existing BondNFT

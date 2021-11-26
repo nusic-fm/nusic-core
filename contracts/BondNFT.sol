@@ -36,12 +36,13 @@ contract BondNFT is ERC721, Ownable {
     bytes32 private spotifyListenersRequestId;
     bytes32 private youtubeSubscribersRequestId;
     
-    constructor(string memory _name, string memory _symbol, address _chainlinkSpotifyListenersAddress, address _chainlinkMetadataRequestAddress, address _chainlinkYoutubeSubscribersAddress) ERC721(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, address _chainlinkSpotifyListenersAddress, address _chainlinkYoutubeSubscribersAddress, address _chainlinkMetadataRequestAddress) ERC721(_name, _symbol) {
         chainlinkSpotifyListeners = ChainlinkSpotifyListeners(_chainlinkSpotifyListenersAddress);
-        chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
         chainlinkYoutubeSubscribers = ChainlinkYoutubeSubscribers(_chainlinkYoutubeSubscribersAddress);
+        chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
     }
 
+    // funding amount means amount issuer will deposit at start
     function initialize(string memory _artistName, string memory _artistId, string memory _channelId, 
                 uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, 
                 uint256 _facevalue, uint256 _spotifyListeners, uint256 _youtubeSubscribers) public {

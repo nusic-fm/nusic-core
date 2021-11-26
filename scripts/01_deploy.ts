@@ -1,26 +1,38 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { ethers, run } from 'hardhat';
-import { BondNFTGenerator, BondNFTGenerator__factory, BondNFTManager, BondNFTManager__factory, ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkOracleInfo, ChainlinkOracleInfo__factory, RatingEngine, RatingEngine__factory } from '../typechain';
+import { BondNFTGenerator, BondNFTGenerator__factory, BondNFTManager, BondNFTManager__factory, ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkSpotifyListeners, ChainlinkSpotifyListeners__factory, ChainlinkYoutubeSubscribers, ChainlinkYoutubeSubscribers__factory, RatingEngine, RatingEngine__factory } from '../typechain';
 
 async function main() {
   
+  /*
+    youtubeSubscribers: a90ac904-9d3b-4f5a-bcb3-15ff1a3a367a
+    spotifyListeners: 9e7106b9-8d48-422b-b82c-392acf4a331a
+    ipfs metadata: b8ec9aad-0280-4ce0-9839-7a731b26c7c3
+  */
   const oracleAddress = "0xcE4452C43390842bE32B45964945276A78985E88";
-  const listenersJobId = "a90ac9049d3b4f5abcb315ff1a3a367a";
+  const youtubeSubscribersJobId = "a90ac9049d3b4f5abcb315ff1a3a367a";
+  const spotifyListenersJobId = "9e7106b98d48422bb82c392acf4a331a";
+  const metadataJobId = "b8ec9aad02804ce098397a731b26c7c3";
   const fee = "1000000000000000000"; // 1 Link token
-  const metadataJobId = "b8ec9aad02804ce098397a731b26c7c3"; // This needs to be changed for right api access
-
   
   const RatingEngine:RatingEngine__factory = await ethers.getContractFactory("RatingEngine");
   const ratingEngine:RatingEngine = await RatingEngine.deploy();
   await ratingEngine.deployed();
   console.log("RatingEngine deployed to:", ratingEngine.address);
 
-  const ChainlinkOracleInfo:ChainlinkOracleInfo__factory = await ethers.getContractFactory("ChainlinkOracleInfo");
-  const chainlinkOracleInfo:ChainlinkOracleInfo = await ChainlinkOracleInfo.deploy();
-  await chainlinkOracleInfo.deployed();
-  console.log("ChainlinkOracleInfo deployed to:", chainlinkOracleInfo.address);
-  await chainlinkOracleInfo.initialize(oracleAddress,listenersJobId,fee);
-  console.log("ChainlinkOracleInfo Initialized");
+  const ChainlinkSpotifyListeners:ChainlinkSpotifyListeners__factory = await ethers.getContractFactory("ChainlinkSpotifyListeners");
+  const chainlinkSpotifyListeners:ChainlinkSpotifyListeners = await ChainlinkSpotifyListeners.deploy();
+  await chainlinkSpotifyListeners.deployed();
+  console.log("ChainlinkSpotifyListeners deployed to:", chainlinkSpotifyListeners.address);
+  await chainlinkSpotifyListeners.initialize(oracleAddress,spotifyListenersJobId,fee);
+  console.log("ChainlinkSpotifyListeners Initialized");
+
+  const ChainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers__factory = await ethers.getContractFactory("ChainlinkYoutubeSubscribers");
+  const chainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers = await ChainlinkYoutubeSubscribers.deploy();
+  await chainlinkYoutubeSubscribers.deployed();
+  console.log("ChainlinkYoutubeSubscribers deployed to:", chainlinkYoutubeSubscribers.address);
+  await chainlinkYoutubeSubscribers.initialize(oracleAddress,youtubeSubscribersJobId,fee);
+  console.log("ChainlinkYoutubeSubscribers Initialized");
 
   const ChainlinkMetadataRequest:ChainlinkMetadataRequest__factory = await ethers.getContractFactory("ChainlinkMetadataRequest");
   const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.deploy();
@@ -40,12 +52,13 @@ async function main() {
   console.log("BondNFTManager deployed to:", bondNFTManager.address);
 
   
-  await bondNFTManager.initialize(ratingEngine.address, bondNFTGenerator.address, chainlinkOracleInfo.address, chainlinkMetadataRequest.address);
+  await bondNFTManager.initialize(ratingEngine.address, bondNFTGenerator.address, chainlinkSpotifyListeners.address, chainlinkYoutubeSubscribers.address, chainlinkMetadataRequest.address);
   console.log("BondNFTManager Initialized");
 
   //bondNFTManager.issueBond("Howie B","howie_b","channelid_howieb","audiusArtistId",BigNumber.from("1000"),BigNumber.from("3"),BigNumber.from("10"),BigNumber.from("2000"),"HowieBNFT","HNFT","");
   console.log("RatingEngine deployed to:", ratingEngine.address);
-  console.log("ChainlinkOracleInfo deployed to:", chainlinkOracleInfo.address);
+  console.log("ChainlinkYoutubeSubscribers deployed to:", chainlinkYoutubeSubscribers.address);
+  console.log("ChainlinkSpotifyListeners deployed to:", chainlinkSpotifyListeners.address);
   console.log("ChainlinkMetadataRequest deployed to:", chainlinkMetadataRequest.address);
   console.log("BondNFTGenerator deployed to:",bondNFTGenerator.address);
   console.log("BondNFTManager deployed to:", bondNFTManager.address);

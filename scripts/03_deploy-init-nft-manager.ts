@@ -10,8 +10,8 @@ async function main() {
   await bondNFTManager.deployed();
   console.log("BondNFTManager deployed to:", bondNFTManager.address);
 
-  // Need to replace address of RatingEngine,BondNFTGenerator,ChainlinkOracleInfo,ChainlinkMetadataRequest in this same order
-  await bondNFTManager.initialize("0xd2A3BF5f8B9F9fD1aF81b1BA47A896e562Aa28D1", "0x0F4763d3652aFB7d061909C5080ee9323b292540", "0xDAccf5a4636c745c796182dCA912546f15C80133", "0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81", "0xEDBbe0A5f876aF88b26B1f0BD06A43dC33EaDf81");
+  // Need to replace address of RatingEngine,BondNFTGenerator, ChainlinkSpotifyListeners, ChainlinkYoutubeSubscribers, ChainlinkMetadataRequest in this same order
+  await bondNFTManager.initialize("0x45fe7d107C8c768d9AD0e8eBC0ac62F010ae1577", "0x5C9a98955d6B41285b9fdBee873BE8B28e2B2259", "0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64", "0x89dBffB9342b113B0bd4CBCBD128A807af846a6E", "0xF1Ff48cE1027a132F5Daf942ffC040a366b906C8");
   console.log("BondNFTManager Initialized");
 }
 

@@ -71,12 +71,12 @@ contract BondNFTManager is Ownable {
         address assetPoolAddress;
     }
 
-    function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkSpotifyListenersAddress, address _chainlinkMetadataRequestAddress, address _chainlinkYoutubeSubscribersAddress) public onlyOwner {
+    function initialize(address _ratingEngine, address _bondNftGenerator, address _chainlinkSpotifyListenersAddress, address _chainlinkYoutubeSubscribersAddress, address _chainlinkMetadataRequestAddress) public onlyOwner {
         ratingEngine = RatingEngine(_ratingEngine);
         bondNFTGenerator = BondNFTGenerator(_bondNftGenerator);
         chainlinkSpotifyListeners = ChainlinkSpotifyListeners(_chainlinkSpotifyListenersAddress);
-        chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
         chainlinkYoutubeSubscribers = ChainlinkYoutubeSubscribers(_chainlinkYoutubeSubscribersAddress);
+        chainlinkMetadataRequest = ChainlinkMetadataRequest(_chainlinkMetadataRequestAddress);
     }
 
     function createAssetPool(uint256 _bondValue) public returns(address assetPoolAddress) {
@@ -95,7 +95,7 @@ contract BondNFTManager is Ownable {
                         /*address _assetPoolAddress,*/ ListenersDetails memory listenersDetails) public returns(address nftAddress) {
         console.log("Issue Bond Started");
         
-        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkSpotifyListeners), address(chainlinkMetadataRequest), address(chainlinkYoutubeSubscribers));
+        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkSpotifyListeners), address(chainlinkYoutubeSubscribers), address(chainlinkMetadataRequest));
         console.log("bondNFTGenerator.generateNFT done = ",nftAddress);
         
         BondNFT bondNFT = BondNFT(nftAddress);
