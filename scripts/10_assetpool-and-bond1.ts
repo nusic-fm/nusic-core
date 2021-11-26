@@ -33,8 +33,10 @@ async function main() {
   console.log("BondNFT deployed to:", bondNFT.address);
 
   
-  const txt1 = await bondNFT.initialize("Howie B",
-  "howie_b","UCOmHUn--16B90oW2L6FRR3Ab",initialFundingProvided,BigNumber.from("2"),BigNumber.from("10"),bondValue, BigNumber.from("1550000"),BigNumber.from("654"));
+  const txt1 = await bondNFT.initialize("Howie B","1DAJPl1Q9bNwPGUqL08nzG",
+                "https://www.youtube.com/user/HowieBVEVO",initialFundingProvided,
+                BigNumber.from("2"),BigNumber.from("10"),bondValue, 
+                BigNumber.from("1550000"),BigNumber.from("6524"));
   console.log("BondNFT Initialized");
   console.log("BondNFT txt.hash =",txt1.hash);
   console.log("BondNFT txt = ",txt1);

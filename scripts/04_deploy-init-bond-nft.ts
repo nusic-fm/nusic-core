@@ -8,7 +8,7 @@ async function main() {
   const BondNFT:BondNFT__factory = await ethers.getContractFactory("BondNFT");
   
   // Uncomment below two lines to deploy new Bond NFT
-  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64","0x89dBffB9342b113B0bd4CBCBD128A807af846a6E","0xF1Ff48cE1027a132F5Daf942ffC040a366b906C8");
+  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64","0x89dBffB9342b113B0bd4CBCBD128A807af846a6E","0x3C1Bbbcf91a8D928691406f1Fe1d7771Dc34D594");
   await bondNFT.deployed();
   
   // Uncomment only to attach existing BondNFT
@@ -17,7 +17,7 @@ async function main() {
   console.log("BondNFT deployed to:", bondNFT.address);
 
   
-  const txt = await bondNFT.initialize("Howie B","howie_b","UCOmHUn--16B90oW2L6FRR3Ab",
+  const txt = await bondNFT.initialize("Howie B","1DAJPl1Q9bNwPGUqL08nzG","https://www.youtube.com/user/HowieBVEVO",
                                   BigNumber.from("1000"),BigNumber.from("3"),
                                   BigNumber.from("10"),BigNumber.from("2000"), 
                                   BigNumber.from("55000"),BigNumber.from("5600"));
