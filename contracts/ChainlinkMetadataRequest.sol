@@ -9,7 +9,7 @@ contract ChainlinkMetadataRequest is ChainlinkRequest {
     using Chainlink for Chainlink.Request;
 
     event MetadataURIRequestInitiated(bytes32 indexed _requestId, address indexed nftAddress);
-    event MetadataURIRequestFulfilled(bytes32 indexed _requestId, address indexed nftAddress, string indexed metadataURI);
+    event MetadataURIRequestFulfilled(bytes32 indexed _requestId, address indexed nftAddress, string metadataURI);
 
     function getMetadataURI(address _nftAddress) public returns (bytes32) {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
@@ -25,11 +25,12 @@ contract ChainlinkMetadataRequest is ChainlinkRequest {
         return requestId; 
     }
 
-    function fulfill(bytes32 _requestId, string memory _metadataURI) public recordChainlinkFulfillment(_requestId) {
+    function fulfill(bytes32 _requestId, bytes32 _metadataURI) public recordChainlinkFulfillment(_requestId) {
         address _nftAddress = requestToNFTAddress[_requestId];
+        string memory _metadataURIStr = bytes32ToString(_metadataURI);
         BondNFT _bondNFT = BondNFT(_nftAddress);
-        _bondNFT.requestMetadataURIFulFill(_requestId, _metadataURI);
-        emit MetadataURIRequestFulfilled(_requestId, _nftAddress ,_metadataURI);
+        _bondNFT.requestMetadataURIFulFill(_requestId, _metadataURIStr);
+        emit MetadataURIRequestFulfilled(_requestId, _nftAddress ,_metadataURIStr);
     }
 
     function toString(address account) internal pure returns(string memory) {
@@ -47,5 +48,18 @@ contract ChainlinkMetadataRequest is ChainlinkRequest {
             str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
         }
         return string(str);
+    }
+
+    function bytes32ToBytes(bytes32 _bytes32) public pure returns (bytes memory){
+        bytes memory bytesArray = new bytes(32);
+        for (uint256 i; i < 32; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return bytesArray;
+    }
+
+    function bytes32ToString(bytes32 _bytes32) public pure returns (string memory){
+        bytes memory bytesArray = bytes32ToBytes(_bytes32);
+        return string(bytesArray);
     }
 }
