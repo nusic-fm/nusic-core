@@ -3,7 +3,6 @@ import "@nomiclabs/hardhat-waffle";
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import dotenv from 'dotenv';
-import "./tasks/set-greeting";
 import "./tasks/01_create-asset-pool";
 import "./tasks/02_read-asset-pool";
 import "./tasks/03_issue-nft-bond";
