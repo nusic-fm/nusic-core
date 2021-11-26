@@ -16,7 +16,6 @@ contract ChainlinkYoutubeSubscribers is ChainlinkRequest{
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
         BondNFT _bondNFT = BondNFT(_nftAddress);
         request.add("id", _bondNFT.channelId());
-        request.add("endpoint", _bondNFT.endpoint());
 
         bytes32 requestId = sendChainlinkRequestTo(oracle, request, fee);
         requestToSender[requestId] = msg.sender;

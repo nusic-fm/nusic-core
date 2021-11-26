@@ -47,7 +47,6 @@ contract ChainlinkMetadataRequest is ChainlinkClient, Ownable {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
         BondNFT _bondNFT = BondNFT(_nftAddress);
         request.add("id", _bondNFT.channelId());
-        request.add("endpoint", _bondNFT.endpoint());
         request.add("nftaddress", toString(_nftAddress));
 
         bytes32 requestId = sendChainlinkRequestTo(oracle, request, fee);

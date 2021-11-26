@@ -17,8 +17,6 @@ contract BondNFT is ERC721, Ownable {
     string public artistName;
     string public artistId;
     string public channelId;
-    string public endpoint;
-    string public audiusArtistId;
     uint256 public fundingAmount;
     uint256 public numberOfYears;
     uint256 public numberOfBonds; // Same as Max Supply
@@ -45,13 +43,11 @@ contract BondNFT is ERC721, Ownable {
     }
 
     function initialize(string memory _artistName, string memory _artistId, string memory _channelId, 
-                string memory _endpoint, string memory _audiusArtistId, uint256 _fundingAmount, 
-                uint256 _numberOfYears, uint256 _numberOfBonds, uint256 _facevalue, uint256 _spotifyListeners, uint256 _youtubeSubscribers) public {
+                uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, 
+                uint256 _facevalue, uint256 _spotifyListeners, uint256 _youtubeSubscribers) public {
         artistName = _artistName;
         artistId = _artistId;
         channelId = _channelId;
-        endpoint = _endpoint;
-        audiusArtistId = _audiusArtistId;
         fundingAmount = _fundingAmount;
         numberOfYears = _numberOfYears;
         numberOfBonds = _numberOfBonds;
@@ -62,7 +58,7 @@ contract BondNFT is ERC721, Ownable {
 
         requestLatestSpotifyListeners();
         requestLatestYoutubeSubscribers();
-        requestMetadataURI(); // This function call be done any of two places one is here and another one is in 'mindBonds' function, depnding on requirement
+        requestMetadataURI();
     }
 
     function mintBonds(address to) public {
@@ -95,6 +91,7 @@ contract BondNFT is ERC721, Ownable {
         require(spotifyListenersRequestId == _requestId, "Spotify Listeners Request Not Matched");
         spotifyListeners = _listeners;
     }
+
 
     // For Youtube Subscribers Request
     function requestLatestYoutubeSubscribers() public {

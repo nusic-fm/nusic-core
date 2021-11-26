@@ -16,7 +16,6 @@ contract BondNFTManager is Ownable {
 
     using Strings for string;
 
-    string private defaultEndpont = "channel";
     RatingEngine private ratingEngine;
     BondNFTGenerator private bondNFTGenerator;
     ChainlinkSpotifyListeners private chainlinkSpotifyListeners;
@@ -27,8 +26,6 @@ contract BondNFTManager is Ownable {
         string artistName;
         string artistId;
         string channelId;
-        string endpoint;
-        string audiusArtistId;
         uint256 fundingAmount;
         uint256 numberOfYears;
         uint256 numberOfBonds;
@@ -93,23 +90,22 @@ contract BondNFTManager is Ownable {
     }
 
     function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, 
-                        string memory _audiusArtistId, uint256 _fundingAmount, uint256 _numberOfYears,
-                        uint256 _numberOfBonds, uint256 _facevalue, string memory _bondName, 
-                        string memory _bondSymbol, /*address _assetPoolAddress,*/ ListenersDetails memory listenersDetails) public returns(address nftAddress) {
+                        uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, 
+                        uint256 _facevalue, string memory _bondName, string memory _bondSymbol, 
+                        /*address _assetPoolAddress,*/ ListenersDetails memory listenersDetails) public returns(address nftAddress) {
         console.log("Issue Bond Started");
         
         nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkSpotifyListeners), address(chainlinkMetadataRequest), address(chainlinkYoutubeSubscribers));
         console.log("bondNFTGenerator.generateNFT done = ",nftAddress);
         
         BondNFT bondNFT = BondNFT(nftAddress);
-        bondNFT.initialize(_artistName, _artistId, _channelId, defaultEndpont,
-                            _audiusArtistId, _fundingAmount, _numberOfYears, _numberOfBonds,
+        bondNFT.initialize(_artistName, _artistId, _channelId, _fundingAmount, _numberOfYears, _numberOfBonds,
                             _facevalue, listenersDetails.spotifyListeners, listenersDetails.youtubeSubscribers);
         console.log("bondNFT.initialize done");
         
-        BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId,defaultEndpont,
-                                                _audiusArtistId,_fundingAmount, _numberOfYears,
-                                                _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
+        BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId, _fundingAmount, 
+                                    _numberOfYears, _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
+        
         console.log("BondConfig done"); 
         userBondConfigs[msg.sender].push(_config);
         console.log("userBondConfigs pushed BondConfig done"); 
