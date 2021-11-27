@@ -101,7 +101,7 @@ contract BondNFTManager is Ownable {
         BondNFT bondNFT = BondNFT(nftAddress);
         bondNFT.initialize(_artistName, _artistId, _channelId, _fundingAmount, _numberOfYears, 
                             _numberOfBonds, _facevalue, listenersDetails.spotifyListeners, 
-                            listenersDetails.youtubeSubscribers);
+                            listenersDetails.youtubeSubscribers, listenersDetails.assetPoolAddress);
         
         BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId, _fundingAmount, 
                                     _numberOfYears, _numberOfBonds, msg.sender,_facevalue,0,nftAddress);

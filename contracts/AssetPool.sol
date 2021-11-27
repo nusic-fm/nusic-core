@@ -30,10 +30,12 @@ contract AssetPool is Ownable {
     DepositCheckPoint[] public quarterCheckPoints;
 
 
+    /*
+    * For first quarter payment we will calculate next payment block as block.number+quarterlyBlocks
+    * From second quarter onwards will calculate next payment block as previously calcualted block + quarterlyBlocks
+    * This is becuase if user delays the payment then we will calcuate based on expected block not on current block
+    */
     receive() external payable {
-        // For first quarter payment we will calculate next payment block as block.number+quarterlyBlocks
-        // From second quarter onwards will calculate next payment block as previously calcualted block + quarterlyBlocks
-        // This is becuase if user delays the payment then we will calcuate based on expected block not on current block
         expectedNextPaymentBlock = currentQuarter == 0? block.number+quarterlyBlocks : expectedNextPaymentBlock + quarterlyBlocks;
         currentQuarter++;
         quarterCheckPoints.push(DepositCheckPoint(block.number, msg.value, block.timestamp, currentQuarter, expectedNextPaymentBlock));
