@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "hardhat/console.sol";
 
 contract AssetPool is Ownable {
 
@@ -32,14 +31,6 @@ contract AssetPool is Ownable {
 
 
     receive() external payable {
-        console.log("In Receive Payment");
-        console.log("msg.sender = ",msg.sender);
-        console.log("msg.value = ",msg.value);
-        console.log("currentQuarter = ",currentQuarter);
-        console.log("quarterCheckPoints.length = ",quarterCheckPoints.length);
-        console.log("block.number = ",block.number);
-        console.log("block.timestamp = ",block.timestamp);
-        console.log("Estimated next block for Payment = ",(block.number+quarterlyBlocks));
         // For first quarter payment we will calculate next payment block as block.number+quarterlyBlocks
         // From second quarter onwards will calculate next payment block as previously calcualted block + quarterlyBlocks
         // This is becuase if user delays the payment then we will calcuate based on expected block not on current block
