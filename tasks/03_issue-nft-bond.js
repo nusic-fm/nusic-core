@@ -1,5 +1,8 @@
 const { BigNumber } = require("@ethersproject/bignumber");
 
+/*
+* Task to issue NFTBond through BondNFT Manager
+*/
 task("issue-nft-bond")
   .addParam("contract","Contract Address")
   .addParam("assetPoolAddress","AssetPoolAddress")

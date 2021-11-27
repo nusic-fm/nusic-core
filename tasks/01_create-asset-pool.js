@@ -1,3 +1,6 @@
+/*
+* Task to create AssetPool through BondNFT Manager
+*/
 task("create-asset-pool")
   .addParam("contract","Contract Address")
   .setAction(async taskArgs=>{

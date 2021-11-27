@@ -1,3 +1,6 @@
+/*
+* Task to read details of all AssetPools created by particular address
+*/
 task("read-asset-pool")
   .addParam("contract","Contract Address")
   .addParam("assetPoolCreatorAddress","Asset Pool creator Address")
@@ -7,10 +10,6 @@ task("read-asset-pool")
     const assetPoolCreatorAddress = taskArgs.assetPoolCreatorAddress;
     const BondNFTManager = await ethers.getContractFactory("BondNFTManager");
     const bondNFTManager = await BondNFTManager.attach(contractAddress);
-
-    //this will not work as expected
-    //const assetPoolAddress = await bondNFTManager.allAssetPools(assetPoolIndex);
-    //console.log("assetPoolAddress = ",assetPoolAddress);
 
     const assetPoolCount = (await bondNFTManager.assetPoolsLengthForUser(assetPoolCreatorAddress)).toNumber();
     console.log(`AssetPoolCount is ${assetPoolCount} for user ${assetPoolCreatorAddress}`);

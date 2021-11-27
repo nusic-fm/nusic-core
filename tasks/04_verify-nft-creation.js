@@ -1,3 +1,6 @@
+/*
+* Task to read details of all BondNFT created by particular address
+*/
 task("verify-nft-creation")
   .addParam("nftManagerContractAddress","Contract Address")
   .addParam("nftCreatorAddress","Bond NFT creator Address")
