@@ -1,7 +1,13 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { ethers, run } from 'hardhat';
-import { BondNFTGenerator, BondNFTGenerator__factory, BondNFTManager, BondNFTManager__factory, ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkSpotifyListeners, ChainlinkSpotifyListeners__factory, ChainlinkYoutubeSubscribers, ChainlinkYoutubeSubscribers__factory, RatingEngine, RatingEngine__factory } from '../typechain';
+import { ethers } from 'hardhat';
+import { BondNFTGenerator, BondNFTGenerator__factory, BondNFTManager, BondNFTManager__factory,
+         ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkSpotifyListeners, 
+         ChainlinkSpotifyListeners__factory, ChainlinkYoutubeSubscribers, ChainlinkYoutubeSubscribers__factory,
+        RatingEngine, RatingEngine__factory 
+      } from '../typechain';
 
+/*
+* Main deployment script to deploy all the relevent contracts
+*/
 async function main() {
   
   /*

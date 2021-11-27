@@ -1,8 +1,11 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import { ethers, run } from 'hardhat';
 import { BondNFTManager, BondNFTManager__factory, } from '../typechain';
 
-// This is only needed when we want to deploy BondNFTManager separately
+// 
+/*
+* Only used when we want to deploy BondNFTManager separately and initialize with existing 
+* contracts (RatingEngine, BondNFTGenerator, ChainlinkSpotifyListeners, ChainlinkYoutubeSubscribers, ChainlinkMetadataRequest)
+*/
 async function main() {
 
   const BondNFTManager:BondNFTManager__factory = await ethers.getContractFactory("BondNFTManager");

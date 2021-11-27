@@ -1,8 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ethers, run } from 'hardhat';
+import { ethers } from 'hardhat';
 import { AssetPool, AssetPool__factory } from '../typechain';
 
-// To Add funds to AssetPool
+/*
+* Script to deposit fund into AssetPool separately
+*/
 async function main() {
 
   const [owner] = await ethers.getSigners();
@@ -22,9 +24,6 @@ async function main() {
 
   const balanceOfAssetPool:BigNumber = await ethers.provider.getBalance(assetPool.address);
   console.log("Asset Pool Balance = ", balanceOfAssetPool.toString());
-
-
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere

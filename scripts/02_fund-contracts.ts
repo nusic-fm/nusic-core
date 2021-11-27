@@ -1,9 +1,14 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import { ethers, fundLink, run } from 'hardhat';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkSpotifyListeners, ChainlinkSpotifyListeners__factory, ChainlinkYoutubeSubscribers, ChainlinkYoutubeSubscribers__factory, LinkTokenInterface__factory } from '../typechain';
+import { ChainlinkMetadataRequest, ChainlinkMetadataRequest__factory, ChainlinkSpotifyListeners, 
+          ChainlinkSpotifyListeners__factory, ChainlinkYoutubeSubscribers, 
+          ChainlinkYoutubeSubscribers__factory, LinkTokenInterface__factory 
+        } from '../typechain';
 const hre:HardhatRuntimeEnvironment = require("hardhat");
 
+/*
+* Script to fund chainlink request contracts
+*/
 async function main() {
   const accounts = await ethers.getSigners();
   const linkAddress:string = "0xa36085F69e2889c224210F603D836748e7dC0088"; // Kovan

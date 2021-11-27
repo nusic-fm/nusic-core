@@ -2,7 +2,9 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { ethers, run } from 'hardhat';
 import { AssetPool, AssetPool__factory, BondNFT, BondNFT__factory } from '../typechain';
 
-// To Check AssetPool Deployment Separately
+/*
+* Script AssetPool and BondNFT deployment, initialization and deposit funding
+*/
 async function main() {
 
   const [owner] = await ethers.getSigners();
@@ -12,7 +14,6 @@ async function main() {
   await assetPool.deployed();
   console.log("AssetPool deployed to:", assetPool.address);
 
-  //const txt = await assetPool.initialize(await owner.getAddress(),BigNumber.from("2000"));
   const bondValue:BigNumber = ethers.utils.parseEther("1");
   const numberOfYears:BigNumber = BigNumber.from(2);
   const initialFundingProvided = bondValue.div(numberOfYears.mul(4));
@@ -46,23 +47,6 @@ async function main() {
   console.log("AssetPool initializeBondInfo");
   console.log("AssetPool initializeBondInfo txt1.hash =",txt2.hash);
 
-  /*
-  // This whole calculation is now useless
-  const ethValue = 4000 * 6.25/100;
-  // For testing
-  // 250 quarterly payment and estimated eth price is 4000
-  // 250 / 4000 = 6.25
-  // 4000 * 6.25/100 = 250;
-
-  // 6.25 / 100 = 0.0625 * 1,000,000,000,000,000,000 = 62,500,000,000,000,000 
-  //62500000000000000
-
-  // Now converting eth value to price
-  // 62500000000000000 * 4000 = 250,000,000,000,000,000,000 / (10 ** 18) = 250 quarter payment
-  
-  // 6.25 / 100 = 0.0625
-  */
-  
   const txt3 = await owner.sendTransaction({
     to: assetPool.address,
     value: initialFundingProvided
@@ -71,23 +55,9 @@ async function main() {
   console.log("AssetPool Payment Received");
   console.log("AssetPool txt3.hash =",txt3.hash);
   //console.log("AssetPool txt1 = ",txt1);
-  
-  /*
-  // Use this just to send addtional payment to asset pool
-  const txt3 = await owner.sendTransaction({
-    to: "0xA4899D35897033b927acFCf422bc745916139776",
-    value: ethers.utils.parseEther("0.875")
-  });
-  await txt3.wait();
-  console.log("AssetPool Payment Received");
-  console.log("AssetPool txt3.hash =",txt3.hash);
-  */
 
   const balanceOfAssetPool:BigNumber = await ethers.provider.getBalance(assetPool.address);
   console.log("Asset Pool Balance = ", balanceOfAssetPool.toString());
-
-
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere
