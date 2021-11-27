@@ -20,7 +20,7 @@ contract RatingEngine is Ownable {
     function allocateRatingByAssetPoolAddress(address _assetPoolAddress, uint256 _couponRate) public view returns(string memory){
         AssetPool assetPool = AssetPool(payable(_assetPoolAddress));
         BondNFT bondNFT = BondNFT(assetPool.nftAddress());
-        uint256 totalListeners = bondNFT.spotifyListeners();
+        uint256 meadianListeners = calculateMedian(bondNFT.spotifyListeners(),bondNFT.youtubeSubscribers());
         uint256 assetPoolBalance = _assetPoolAddress.balance;
         uint256 bondValue = assetPool.bondValue();
         uint256 totalValueWithInterest = bondValue + calculateYiedPayment(bondValue, _couponRate, assetPool.numberOfQuarters());
@@ -31,9 +31,9 @@ contract RatingEngine is Ownable {
         bool _isCollateralUpToDate = assetPool.expectedNextPaymentBlock() > block.number;
         uint256 _numberOfQuarterDelayed = _isCollateralUpToDate? 0 : calculateDelayedQuarters(assetPool.expectedNextPaymentBlock());
 
-        string memory _rating = calculateRating(totalListeners, _isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
+        string memory _rating = calculateRating(meadianListeners, _isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
         
-        console.log("Total Listners = ",totalListeners);
+        console.log("Meadian Listners = ",meadianListeners);
         console.log("AssetPoolBalance = ",assetPoolBalance);
         console.log("BondValue = ",bondValue);
         console.log("TotalValueWithInterest = ",totalValueWithInterest);
@@ -73,6 +73,10 @@ contract RatingEngine is Ownable {
         return  (blockDifference <= quarterlyBlocks)? 1 : 2;
     }
 
+    function calculateMedian(uint256 _spotifyListeners, uint256 _youtubesubscribers) public pure returns (uint256 median){
+        median = (_spotifyListeners + _youtubesubscribers) / 2;
+    }
+
     // Temporary funciton, will be removed
     function checkAssetPoolBalance(address _assetPoolAddress) public view returns (uint256){
         console.log("Asset Pool Balance = ",_assetPoolAddress.balance);
@@ -100,14 +104,14 @@ contract RatingEngine is Ownable {
     }
 
 
-    function calculateRating(uint256 _totalListeners,bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory){
-        if(_totalListeners >= 5000000) {
+    function calculateRating(uint256 _meadianListeners,bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory){
+        if(_meadianListeners >= 5000000) {
             return ratingForTier1Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
         }
-        else if(_totalListeners >= 500000 && _totalListeners <= 4999999) {
+        else if(_meadianListeners >= 500000 && _meadianListeners <= 4999999) {
             return ratingForTier2Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
         }
-        else if(_totalListeners >= 0 && _totalListeners <= 499999){
+        else if(_meadianListeners >= 0 && _meadianListeners <= 499999){
             return ratingForTier3Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
         }
         return "R";
