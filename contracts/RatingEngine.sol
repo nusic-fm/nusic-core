@@ -5,11 +5,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./BondNFT.sol";
 import "./AssetPool.sol";
-import "hardhat/console.sol";
 
+/*
+* RatingEngine will be used to calculate rating of BondNFT
+*/
 contract RatingEngine is Ownable {
 
-    
     uint256 public riskPremium;
     uint256 public constant PRECISION = 1e18;
 
@@ -31,34 +32,11 @@ contract RatingEngine is Ownable {
         bool _isCollateralUpToDate = assetPool.expectedNextPaymentBlock() > block.number;
         uint256 _numberOfQuarterDelayed = _isCollateralUpToDate? 0 : calculateDelayedQuarters(assetPool.expectedNextPaymentBlock());
 
-        string memory _rating = calculateRating(meadianListeners, _isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
-        
-        console.log("Meadian Listners = ",meadianListeners);
-        console.log("AssetPoolBalance = ",assetPoolBalance);
-        console.log("BondValue = ",bondValue);
-        console.log("TotalValueWithInterest = ",totalValueWithInterest);
-        console.log("IsOvercollateralized = ",_isOvercollateralized);
-        console.log("IsCollateralUpToDate = ",_isCollateralUpToDate);
-        console.log("NumberOfQuarterDelayed = ",_numberOfQuarterDelayed);
-        console.log("Rating Assigned = ",_rating);
-        return _rating;
+        return calculateRating(meadianListeners, _isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
     }
 
-    function calculateYiedPayment(uint256 _bondValue, uint256 _couponRate, uint256 _numberOfQuarters) private view returns (uint256 totalYield){
-        console.log("_bondValue ",_bondValue);
-        console.log("_couponRate ",_couponRate);
-        console.log("_numberOfQuarters ",_numberOfQuarters);
-        console.log("(100*PRECISION)  ",(100*PRECISION) );
-        console.log("(_bondValue * _couponRate) ",(_bondValue * _couponRate));
-        
-        console.log("(_bondValue * _couponRate) / (100*PRECISION) ",(_bondValue * _couponRate) / (100*PRECISION));
-        console.log("((_bondValue * _couponRate) / (100*PRECISION) / 4 ) ",((_bondValue * _couponRate) / (100*PRECISION) / 4 ));
-        
-        // This is how we normally do but in our case this will not work
-        //totalYield = (_bondValue * (_couponRate/ 4 / 100)) * _numberOfQuarters;
-
+    function calculateYiedPayment(uint256 _bondValue, uint256 _couponRate, uint256 _numberOfQuarters) private pure returns (uint256 totalYield){
         totalYield = ((_bondValue * _couponRate) / (100*PRECISION) / 4 ) * _numberOfQuarters;
-        console.log("Total yield ",totalYield);
     }
 
     function isOvercollateralized (uint256 _assetPoolBalance,  uint256 _totalValueWithInterest) private pure returns(bool) {
@@ -77,33 +55,6 @@ contract RatingEngine is Ownable {
         median = (_spotifyListeners + _youtubesubscribers) / 2;
     }
 
-    // Temporary funciton, will be removed
-    function checkAssetPoolBalance(address _assetPoolAddress) public view returns (uint256){
-        console.log("Asset Pool Balance = ",_assetPoolAddress.balance);
-        console.log("1 = ",(_assetPoolAddress.balance * 4000));
-        console.log("2 = ",((_assetPoolAddress.balance * 4000) / (10**18)));
-        
-        uint256 cop = 2;
-        uint256 copVal = cop * 1e18;
-        uint256 percentDivider = 100 * (1e18); //1.0755
-
-        uint256 amount = _assetPoolAddress.balance * 4000;
-        uint256 amountP = amount * copVal;
-        uint256 amountP1 = amount * copVal / percentDivider;
-
-        console.log("3 = ",cop);
-        console.log("4 = ",copVal);
-        console.log("5 = ",percentDivider);
-        console.log("6 = ",amount);
-        console.log("7 = ",amountP);
-        console.log("8 = ",amountP1);
-        
-        console.log("9 = ",PRECISION);
-        
-        return _assetPoolAddress.balance;
-    }
-
-
     function calculateRating(uint256 _meadianListeners,bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory){
         if(_meadianListeners >= 5000000) {
             return ratingForTier1Category(_isOvercollateralized, _isCollateralUpToDate, _numberOfQuarterDelayed);
@@ -117,7 +68,7 @@ contract RatingEngine is Ownable {
         return "R";
     }
 
-    //For 5 million or more
+    //For 5 million or more users
     function ratingForTier1Category(bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory){
         if(_isOvercollateralized){
             return "AAA";
@@ -133,7 +84,7 @@ contract RatingEngine is Ownable {
         }
     }
 
-    //For 500,000 - 4,999,999
+    //For 500,000 - 4,999,999 users
     function ratingForTier2Category(bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory) {
         if(_isOvercollateralized){
             return "AA";
@@ -148,7 +99,8 @@ contract RatingEngine is Ownable {
             return "R";
         }
     }
-    //For 0 - 499,999
+    
+    //For 0 - 499,999 users
     function ratingForTier3Category(bool _isOvercollateralized, bool _isCollateralUpToDate, uint256 _numberOfQuarterDelayed) public pure returns (string memory) {
         if(_isOvercollateralized){
             return "A";
