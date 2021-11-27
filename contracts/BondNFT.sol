@@ -93,7 +93,6 @@ contract BondNFT is ERC721, Ownable {
         spotifyListeners = _listeners;
     }
 
-
     // For Youtube Subscribers Request
     function requestLatestYoutubeSubscribers() public {
         youtubeSubscribersRequestId = chainlinkYoutubeSubscribers.getLatestSubscribers(address(this));

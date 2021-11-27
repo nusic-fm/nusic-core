@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "./ChainlinkRequest.sol";
 import "./BondNFT.sol";
 
-
+/*
+* ChainlinkYoutubeSubscribers contract is for requesting Youtube Subscribers from Oracle
+*/
 contract ChainlinkYoutubeSubscribers is ChainlinkRequest{
     using Strings for string;
     using Chainlink for Chainlink.Request;

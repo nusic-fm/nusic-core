@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "./ChainlinkRequest.sol";
 import "./BondNFT.sol";
 
-
+/*
+* ChainlinkSpotifyListeners contract is for Spotify Listeners from Oracle
+*/
 contract ChainlinkSpotifyListeners is ChainlinkRequest {
     using Strings for string;
     using Chainlink for Chainlink.Request;

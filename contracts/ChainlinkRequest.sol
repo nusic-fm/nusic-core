@@ -5,7 +5,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
-
+/*
+* Abstract parent contract for all chainlink requests
+*/
 abstract contract ChainlinkRequest is ChainlinkClient, Ownable {
     using Strings for string;
     using Chainlink for Chainlink.Request;
@@ -25,7 +27,6 @@ abstract contract ChainlinkRequest is ChainlinkClient, Ownable {
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
         fee = _fee;
-        //fee = 1 * 10 ** 18; // (Varies by network and job)
     }
 
     function getOracle() public view returns (address) {
@@ -40,6 +41,7 @@ abstract contract ChainlinkRequest is ChainlinkClient, Ownable {
         return fee;
     }
 
+    //Convert string to bytes32
     function stringToBytes32(string memory source) private pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {

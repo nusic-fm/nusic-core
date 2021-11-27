@@ -4,6 +4,9 @@ pragma solidity ^0.8.0;
 import "./ChainlinkRequest.sol";
 import "./BondNFT.sol";
 
+/*
+* ChainlinkMetadataRequest contract is for requesting NFT Metadata from Oracle
+*/
 contract ChainlinkMetadataRequest is ChainlinkRequest {
     using Strings for string;
     using Chainlink for Chainlink.Request;

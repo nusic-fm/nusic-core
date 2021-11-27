@@ -92,34 +92,28 @@ contract BondNFTManager is Ownable {
     function issueBond(string memory _artistName, string memory _artistId, string memory _channelId, 
                         uint256 _fundingAmount, uint256 _numberOfYears, uint256 _numberOfBonds, 
                         uint256 _facevalue, string memory _bondName, string memory _bondSymbol, 
-                        /*address _assetPoolAddress,*/ ListenersDetails memory listenersDetails) public returns(address nftAddress) {
-        console.log("Issue Bond Started");
+                        ListenersDetails memory listenersDetails) public returns(address nftAddress) {
         
-        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, address(chainlinkSpotifyListeners), address(chainlinkYoutubeSubscribers), address(chainlinkMetadataRequest));
-        console.log("bondNFTGenerator.generateNFT done = ",nftAddress);
-        
+        nftAddress = bondNFTGenerator.generateNFT(_bondName, _bondSymbol, 
+                                                    address(chainlinkSpotifyListeners), 
+                                                    address(chainlinkYoutubeSubscribers), 
+                                                    address(chainlinkMetadataRequest));
         BondNFT bondNFT = BondNFT(nftAddress);
-        bondNFT.initialize(_artistName, _artistId, _channelId, _fundingAmount, _numberOfYears, _numberOfBonds,
-                            _facevalue, listenersDetails.spotifyListeners, listenersDetails.youtubeSubscribers);
-        console.log("bondNFT.initialize done");
+        bondNFT.initialize(_artistName, _artistId, _channelId, _fundingAmount, _numberOfYears, 
+                            _numberOfBonds, _facevalue, listenersDetails.spotifyListeners, 
+                            listenersDetails.youtubeSubscribers);
         
         BondConfig memory _config = BondConfig(_artistName,_artistId,_channelId, _fundingAmount, 
                                     _numberOfYears, _numberOfBonds, msg.sender,_facevalue,0,nftAddress);
         
-        console.log("BondConfig done"); 
         userBondConfigs[msg.sender].push(_config);
-        console.log("userBondConfigs pushed BondConfig done"); 
         allBondNfts.push(nftAddress);
-        console.log("allBondNfts pushed nftAddress done"); 
         
         AssetPoolInfo memory assetPoolInfo = getAssetPoolInfo(msg.sender,listenersDetails.assetPoolAddress);
-        console.log("AssetPoolInfo accessed ",assetPoolInfo.assetPoolAddress); 
         assetPoolInfo.bondNftAddress = nftAddress;
         AssetPool assetPool = AssetPool(payable(listenersDetails.assetPoolAddress));
         assetPool.initializeBondInfo(_numberOfYears, nftAddress);
         emit BondNFTCreated(msg.sender,nftAddress,_bondName,_bondSymbol);
-        console.log("BondNFTCreated event emitted done"); 
-        
     }
 
     function getAssetPoolInfo(address _artist, address _assetPoolAddress) private view returns(AssetPoolInfo memory) {
@@ -153,14 +147,4 @@ contract BondNFTManager is Ownable {
     function nftBondLengthForUser(address _creatorAddress) external view returns (uint256) {
         return userBondConfigs[_creatorAddress].length;
     }
-
-
-    // Seems to be not need now 
-    /*
-    function calculateFacevalue(bytes32 _requestId) private {
-        BondConfig memory _bondConfig = bondConfigs[_requestId];
-        uint256 _faceValue = _bondConfig.fundingAmount * (_bondConfig.numberOfYears * 4) * ratingEngine.riskPremium();
-        _bondConfig.faceValue = _faceValue;
-    }*/
-
 }
