@@ -25,6 +25,7 @@ contract BondNFT is ERC721, Ownable {
     uint256 public spotifyListeners;
     uint256 public youtubeSubscribers;
     address public assetPoolAddress;
+    uint256 public individualBondValue;
 
     // URI to be used before Reveal
     string public defaultURI = "ipfs://QmUNYMorLY9y15eYYZDXxTbdQPAXWqC3MwMm4Jtuz7SsxA";
@@ -58,6 +59,7 @@ contract BondNFT is ERC721, Ownable {
         spotifyListeners = _spotifyListeners;
         youtubeSubscribers = _youtubeSubscribers;
         assetPoolAddress = _assetPoolAddress;
+        individualBondValue = faceValue/numberOfBonds;
 
         requestLatestSpotifyListeners();
         requestLatestYoutubeSubscribers();
