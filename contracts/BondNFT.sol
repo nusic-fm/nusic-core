@@ -113,8 +113,8 @@ contract BondNFT is ERC721, Ownable {
     
     // For Meatadata URI Request
     function requestMetadataURIFulFill(bytes32 _requestId, string memory _metadataURI) public {
-        require(metadataRequestId == _requestId, "Metadata Request Not Matched");
-        baseURI = _metadataURI;
+        //require(metadataRequestId == _requestId, "Metadata Request Not Matched");
+        //baseURI = _metadataURI;
     }
 
 }
