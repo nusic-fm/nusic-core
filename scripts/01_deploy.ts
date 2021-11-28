@@ -20,7 +20,7 @@ async function main() {
   const spotifyListenersJobId = "9e7106b98d48422bb82c392acf4a331a";
   const metadataJobId = "b8ec9aad02804ce098397a731b26c7c3";
   const fee = "1000000000000000000"; // 1 Link token
-  
+
   const RatingEngine:RatingEngine__factory = await ethers.getContractFactory("RatingEngine");
   const ratingEngine:RatingEngine = await RatingEngine.deploy();
   await ratingEngine.deployed();
@@ -57,11 +57,9 @@ async function main() {
   await bondNFTManager.deployed();
   console.log("BondNFTManager deployed to:", bondNFTManager.address);
 
-  
   await bondNFTManager.initialize(ratingEngine.address, bondNFTGenerator.address, chainlinkSpotifyListeners.address, chainlinkYoutubeSubscribers.address, chainlinkMetadataRequest.address);
   console.log("BondNFTManager Initialized");
-
-  //bondNFTManager.issueBond("Howie B","howie_b","channelid_howieb","audiusArtistId",BigNumber.from("1000"),BigNumber.from("3"),BigNumber.from("10"),BigNumber.from("2000"),"HowieBNFT","HNFT","");
+  
   console.log("RatingEngine deployed to:", ratingEngine.address);
   console.log("ChainlinkYoutubeSubscribers deployed to:", chainlinkYoutubeSubscribers.address);
   console.log("ChainlinkSpotifyListeners deployed to:", chainlinkSpotifyListeners.address);

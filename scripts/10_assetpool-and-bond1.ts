@@ -14,7 +14,7 @@ async function main() {
   await assetPool.deployed();
   console.log("AssetPool deployed to:", assetPool.address);
 
-  const bondValue:BigNumber = ethers.utils.parseEther("1");
+  const bondValue:BigNumber = ethers.utils.parseEther("0.2");
   const numberOfYears:BigNumber = BigNumber.from(2);
   const initialFundingProvided = bondValue.div(numberOfYears.mul(4));
 
@@ -26,7 +26,7 @@ async function main() {
   // Uncomment only to attach existing AssetPool
   //const assetPool:AssetPool = await AssetPool.attach("0x610178dA211FEF7D417bC0e6FeD39F05609AD788");
   const BondNFT:BondNFT__factory = await ethers.getContractFactory("BondNFT");
-  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64","0x89dBffB9342b113B0bd4CBCBD128A807af846a6E","0xF1Ff48cE1027a132F5Daf942ffC040a366b906C8");
+  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0xEaD5c52F471857C33b5Dd787309A7B9d9C5703f1","0x10d0ad0968Bd1DB01e3f8B5E45a36977BdF24fA9","0xaEAB9115b8792643a94d91F601105af5Fa1c6769");
   await bondNFT.deployed();
   
   // Uncomment only to attach existing BondNFT
@@ -36,7 +36,7 @@ async function main() {
   
   const txt1 = await bondNFT.initialize("Howie B","1DAJPl1Q9bNwPGUqL08nzG",
                 "https://www.youtube.com/user/HowieBVEVO",initialFundingProvided,
-                BigNumber.from("2"),BigNumber.from("10"),bondValue, 
+                BigNumber.from("2"),BigNumber.from("2"),bondValue, 
                 BigNumber.from("1550000"),BigNumber.from("6524"), assetPool.address);
   console.log("BondNFT Initialized");
   console.log("BondNFT txt.hash =",txt1.hash);
@@ -47,6 +47,7 @@ async function main() {
   console.log("AssetPool initializeBondInfo");
   console.log("AssetPool initializeBondInfo txt1.hash =",txt2.hash);
 
+  
   const txt3 = await owner.sendTransaction({
     to: assetPool.address,
     value: initialFundingProvided
@@ -55,7 +56,7 @@ async function main() {
   console.log("AssetPool Payment Received");
   console.log("AssetPool txt3.hash =",txt3.hash);
   //console.log("AssetPool txt1 = ",txt1);
-
+  
   const balanceOfAssetPool:BigNumber = await ethers.provider.getBalance(assetPool.address);
   console.log("Asset Pool Balance = ", balanceOfAssetPool.toString());
 }

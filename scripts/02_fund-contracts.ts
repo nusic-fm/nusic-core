@@ -15,23 +15,23 @@ async function main() {
   const linkToken = LinkTokenInterface__factory.connect(linkAddress,accounts[0]);
 
   const ChainlinkSpotifyListeners:ChainlinkSpotifyListeners__factory = await ethers.getContractFactory("ChainlinkSpotifyListeners");
-  const chainlinkSpotifyListeners:ChainlinkSpotifyListeners = await ChainlinkSpotifyListeners.attach("0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64");
+  const chainlinkSpotifyListeners:ChainlinkSpotifyListeners = await ChainlinkSpotifyListeners.attach("0xEaD5c52F471857C33b5Dd787309A7B9d9C5703f1");
 
   const ChainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers__factory = await ethers.getContractFactory("ChainlinkYoutubeSubscribers");
-  const chainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers = await ChainlinkYoutubeSubscribers.attach("0x89dBffB9342b113B0bd4CBCBD128A807af846a6E");
+  const chainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers = await ChainlinkYoutubeSubscribers.attach("0x10d0ad0968Bd1DB01e3f8B5E45a36977BdF24fA9");
   
   const ChainlinkMetadataRequest:ChainlinkMetadataRequest__factory = await ethers.getContractFactory("ChainlinkMetadataRequest");
-  const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.attach("0x3C1Bbbcf91a8D928691406f1Fe1d7771Dc34D594");
+  const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.attach("0xaEAB9115b8792643a94d91F601105af5Fa1c6769");
 
-  await fundLink(hre,chainlinkYoutubeSubscribers.address, "10000000000000000000"); // 10 link token
+  await fundLink(hre,chainlinkYoutubeSubscribers.address, "5000000000000000000"); // 10 link token
   console.log("ChainlinkYoutubeSubscribers funded!!");
   console.log("ChainlinkYoutubeSubscribers LinkToken Balance ", (await linkToken.balanceOf(chainlinkYoutubeSubscribers.address)).toString());
 
-  await fundLink(hre,chainlinkSpotifyListeners.address, "10000000000000000000"); // 10 link token
+  await fundLink(hre,chainlinkSpotifyListeners.address, "5000000000000000000"); // 10 link token
   console.log("ChainlinkSpotifyListeners funded!!");
   console.log("ChainlinkSpotifyListeners LinkToken Balance ", (await linkToken.balanceOf(chainlinkSpotifyListeners.address)).toString());
 
-  await fundLink(hre,chainlinkMetadataRequest.address, "10000000000000000000"); // 10 link token
+  await fundLink(hre,chainlinkMetadataRequest.address, "5000000000000000000"); // 10 link token
   console.log("ChainlinkMetadataRequest funded!!");
   console.log("ChainlinkMetadataRequest LinkToken Balance ", (await linkToken.balanceOf(chainlinkMetadataRequest.address)).toString());
   

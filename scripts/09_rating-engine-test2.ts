@@ -11,12 +11,13 @@ async function main() {
 
   const ratingEngine:RatingEngine = await RatingEngine.deploy();
   await ratingEngine.deployed();
+  //const ratingEngine:RatingEngine = await RatingEngine.attach("0x45fe7d107C8c768d9AD0e8eBC0ac62F010ae1577")
   console.log("RatingEngine deployed to:", ratingEngine.address);
 
   const BondNFT:BondNFT__factory = await ethers.getContractFactory("BondNFT");
-  const bondNFT:BondNFT = await BondNFT.attach("0xAA292E8611aDF267e563f334Ee42320aC96D0463");
+  const bondNFT:BondNFT = await BondNFT.attach("0x1b3c151198Acff6d2d2dCb063FABf3ec2E989cEc");
 
-  const rating:string = await ratingEngine.allocateRatingByAssetPoolAddress("0xA4899D35897033b927acFCf422bc745916139776", ethers.utils.parseEther("2")); 
+  const rating:string = await ratingEngine.allocateRatingByAssetPoolAddress("0x1C5053dC2e3447E1cbD63Db758002B0964432D1a", ethers.utils.parseEther("2")); 
   console.log("Rating = ",rating);
 }
 
