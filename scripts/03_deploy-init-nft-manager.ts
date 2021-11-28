@@ -1,7 +1,6 @@
 import { ethers, run } from 'hardhat';
 import { BondNFTManager, BondNFTManager__factory, } from '../typechain';
 
-// 
 /*
 * Only used when we want to deploy BondNFTManager separately and initialize with existing 
 * contracts (RatingEngine, BondNFTGenerator, ChainlinkSpotifyListeners, ChainlinkYoutubeSubscribers, ChainlinkMetadataRequest)
@@ -14,7 +13,7 @@ async function main() {
   console.log("BondNFTManager deployed to:", bondNFTManager.address);
 
   // Need to replace address of RatingEngine,BondNFTGenerator, ChainlinkSpotifyListeners, ChainlinkYoutubeSubscribers, ChainlinkMetadataRequest in this same order
-  await bondNFTManager.initialize("0xA7d66A42314878824570AE14EA98312af8eCF799", "0x94F1Da34Dc54661Cd534F5e8197Fe2839f52b603", "0xcD8D700b292BD437B85e903ECDe9c026a62CFA3f", "0x3c734BF02b428bdC22ADD2F1b20E16156Bc53dDf", "0xF58CCda92BF87C5eFD4b48894901a13e017F672F");
+  await bondNFTManager.initialize("0x960319ef5663148bd03AbEeaf0EaB00A9C89bc1b", "0x9e51efE23277Ed2547c16F502463105db318bdaF", "0x05cA3e08c871D6CE41AaffdEB59d71088dFD76F0", "0xc24b4940D52B97F6D2754F51CE40b38e64E81d9B", "0x681Ffe5CCfA0576017e82ab87efBDe130C5930AF");
   console.log("BondNFTManager Initialized");
 }
 

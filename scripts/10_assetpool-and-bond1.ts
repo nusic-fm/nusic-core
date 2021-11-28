@@ -8,21 +8,21 @@ import { AssetPool, AssetPool__factory, BondNFT, BondNFT__factory } from '../typ
 async function main() {
 
   const [owner] = await ethers.getSigners();
+  const bondValue:BigNumber = ethers.utils.parseEther("0.3");
+  const numberOfYears:BigNumber = BigNumber.from("2");
+  const initialFundingProvided = bondValue.div(numberOfYears.mul(4));
+  const numberOfBonds:BigNumber = BigNumber.from("2");
+
   const AssetPool:AssetPool__factory = await ethers.getContractFactory("AssetPool");
-  
   const assetPool:AssetPool = await AssetPool.deploy();
   await assetPool.deployed();
   console.log("AssetPool deployed to:", assetPool.address);
-
-  const bondValue:BigNumber = ethers.utils.parseEther("0.2");
-  const numberOfYears:BigNumber = BigNumber.from(2);
-  const initialFundingProvided = bondValue.div(numberOfYears.mul(4));
-
+  
   const txt = await assetPool.initialize(await owner.getAddress(),bondValue);
   console.log("AssetPool Initialized");
   console.log("AssetPool txt.hash =",txt.hash);
   //console.log("AssetPool txt = ",txt);
-  
+
   // Uncomment only to attach existing AssetPool
   //const assetPool:AssetPool = await AssetPool.attach("0x610178dA211FEF7D417bC0e6FeD39F05609AD788");
   const BondNFT:BondNFT__factory = await ethers.getContractFactory("BondNFT");
@@ -36,8 +36,8 @@ async function main() {
   
   const txt1 = await bondNFT.initialize("Howie B","1DAJPl1Q9bNwPGUqL08nzG",
                 "https://www.youtube.com/user/HowieBVEVO",initialFundingProvided,
-                BigNumber.from("2"),BigNumber.from("2"),bondValue, 
-                BigNumber.from("1550000"),BigNumber.from("6524"), assetPool.address);
+                numberOfYears,numberOfBonds,bondValue, 
+                BigNumber.from("1550000"),BigNumber.from("6524"), "0xd4d26ee4ad18b7d8393eaf225ab1dc36e5467075");
   console.log("BondNFT Initialized");
   console.log("BondNFT txt.hash =",txt1.hash);
   console.log("BondNFT txt = ",txt1);
@@ -47,7 +47,7 @@ async function main() {
   console.log("AssetPool initializeBondInfo");
   console.log("AssetPool initializeBondInfo txt1.hash =",txt2.hash);
 
-  
+
   const txt3 = await owner.sendTransaction({
     to: assetPool.address,
     value: initialFundingProvided
@@ -56,9 +56,11 @@ async function main() {
   console.log("AssetPool Payment Received");
   console.log("AssetPool txt3.hash =",txt3.hash);
   //console.log("AssetPool txt1 = ",txt1);
-  
+
+
   const balanceOfAssetPool:BigNumber = await ethers.provider.getBalance(assetPool.address);
   console.log("Asset Pool Balance = ", balanceOfAssetPool.toString());
+  
 }
 
 // We recommend this pattern to be able to use async/await everywhere
