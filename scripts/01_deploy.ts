@@ -15,7 +15,7 @@ async function main() {
     spotifyListeners: 9e7106b9-8d48-422b-b82c-392acf4a331a
     ipfs metadata: b8ec9aad-0280-4ce0-9839-7a731b26c7c3
   */
-  const oracleAddress = "0xcE4452C43390842bE32B45964945276A78985E88";
+  const oracleAddress = "0xBA7a2F6C989c31F1Feb96f35439DCe1F944fbC83";
   const youtubeSubscribersJobId = "a90ac9049d3b4f5abcb315ff1a3a367a";
   const spotifyListenersJobId = "9e7106b98d48422bb82c392acf4a331a";
   const metadataJobId = "b8ec9aad02804ce098397a731b26c7c3";
@@ -61,8 +61,8 @@ async function main() {
   console.log("BondNFTManager Initialized");
   
   console.log("RatingEngine deployed to:", ratingEngine.address);
-  console.log("ChainlinkYoutubeSubscribers deployed to:", chainlinkYoutubeSubscribers.address);
   console.log("ChainlinkSpotifyListeners deployed to:", chainlinkSpotifyListeners.address);
+  console.log("ChainlinkYoutubeSubscribers deployed to:", chainlinkYoutubeSubscribers.address);
   console.log("ChainlinkMetadataRequest deployed to:", chainlinkMetadataRequest.address);
   console.log("BondNFTGenerator deployed to:",bondNFTGenerator.address);
   console.log("BondNFTManager deployed to:", bondNFTManager.address);

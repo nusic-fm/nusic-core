@@ -11,17 +11,17 @@ const hre:HardhatRuntimeEnvironment = require("hardhat");
 */
 async function main() {
   const accounts = await ethers.getSigners();
-  const linkAddress:string = "0xa36085F69e2889c224210F603D836748e7dC0088"; // Kovan
+  const linkAddress:string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709"; // Rinkeby
   const linkToken = LinkTokenInterface__factory.connect(linkAddress,accounts[0]);
 
   const ChainlinkSpotifyListeners:ChainlinkSpotifyListeners__factory = await ethers.getContractFactory("ChainlinkSpotifyListeners");
-  const chainlinkSpotifyListeners:ChainlinkSpotifyListeners = await ChainlinkSpotifyListeners.attach("0xEaD5c52F471857C33b5Dd787309A7B9d9C5703f1");
+  const chainlinkSpotifyListeners:ChainlinkSpotifyListeners = await ChainlinkSpotifyListeners.attach("0xcD8D700b292BD437B85e903ECDe9c026a62CFA3f");
 
   const ChainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers__factory = await ethers.getContractFactory("ChainlinkYoutubeSubscribers");
-  const chainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers = await ChainlinkYoutubeSubscribers.attach("0x10d0ad0968Bd1DB01e3f8B5E45a36977BdF24fA9");
+  const chainlinkYoutubeSubscribers:ChainlinkYoutubeSubscribers = await ChainlinkYoutubeSubscribers.attach("0x3c734BF02b428bdC22ADD2F1b20E16156Bc53dDf");
   
   const ChainlinkMetadataRequest:ChainlinkMetadataRequest__factory = await ethers.getContractFactory("ChainlinkMetadataRequest");
-  const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.attach("0xaEAB9115b8792643a94d91F601105af5Fa1c6769");
+  const chainlinkMetadataRequest:ChainlinkMetadataRequest = await ChainlinkMetadataRequest.attach("0xF58CCda92BF87C5eFD4b48894901a13e017F672F");
 
   await fundLink(hre,chainlinkYoutubeSubscribers.address, "5000000000000000000"); // 10 link token
   console.log("ChainlinkYoutubeSubscribers funded!!");

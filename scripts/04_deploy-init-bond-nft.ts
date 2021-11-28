@@ -8,7 +8,7 @@ async function main() {
   const BondNFT:BondNFT__factory = await ethers.getContractFactory("BondNFT");
   
   // Uncomment below two lines to deploy new Bond NFT
-  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64","0x89dBffB9342b113B0bd4CBCBD128A807af846a6E","0x3C1Bbbcf91a8D928691406f1Fe1d7771Dc34D594");
+  const bondNFT:BondNFT = await BondNFT.deploy("BondNFT","BFT","0xcD8D700b292BD437B85e903ECDe9c026a62CFA3f","0x3c734BF02b428bdC22ADD2F1b20E16156Bc53dDf","0xF58CCda92BF87C5eFD4b48894901a13e017F672F");
   await bondNFT.deployed();
   
   // Uncomment only to attach existing BondNFT

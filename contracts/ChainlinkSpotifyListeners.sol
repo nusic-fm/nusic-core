@@ -5,7 +5,7 @@ import "./ChainlinkRequest.sol";
 import "./BondNFT.sol";
 
 /*
-* ChainlinkSpotifyListeners contract is for Spotify Listeners from Oracle
+* ChainlinkSpotifyListeners contract is for requesting Spotify Listeners from Oracle
 */
 contract ChainlinkSpotifyListeners is ChainlinkRequest {
     using Strings for string;

@@ -14,7 +14,7 @@ async function main() {
   console.log("BondNFTManager deployed to:", bondNFTManager.address);
 
   // Need to replace address of RatingEngine,BondNFTGenerator, ChainlinkSpotifyListeners, ChainlinkYoutubeSubscribers, ChainlinkMetadataRequest in this same order
-  await bondNFTManager.initialize("0x45fe7d107C8c768d9AD0e8eBC0ac62F010ae1577", "0x5C9a98955d6B41285b9fdBee873BE8B28e2B2259", "0x6a6De4970ddbD35C0b8cFFc529687Ef3b6B0Be64", "0x89dBffB9342b113B0bd4CBCBD128A807af846a6E", "0xF1Ff48cE1027a132F5Daf942ffC040a366b906C8");
+  await bondNFTManager.initialize("0xA7d66A42314878824570AE14EA98312af8eCF799", "0x94F1Da34Dc54661Cd534F5e8197Fe2839f52b603", "0xcD8D700b292BD437B85e903ECDe9c026a62CFA3f", "0x3c734BF02b428bdC22ADD2F1b20E16156Bc53dDf", "0xF58CCda92BF87C5eFD4b48894901a13e017F672F");
   console.log("BondNFTManager Initialized");
 }
 
