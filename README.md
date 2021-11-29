@@ -19,20 +19,19 @@ The artist can fractionalize the bond, so they can offer it up as a collection o
 
 | Rating | Color | Grade | Spotify/YouTube Median | Over col. | Min Col. | Col. <1Q late | Col. >1Q late |
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| AAA | #98C359 | Investment | 5,000,000+ | ✔️  |  |  |  |
-| AA | #9BBE54 | Investment | 500,000 - 4,999,999 | ✔️  |  |  |  |
-| A | #A5B651 | Investment | 0 - 499,999 | ✔️  |  |  |  |
-| III | #ADAC4E | Speculative | 5,000,000+ |  | ✔️ |  |  |
-| II | #B9A14A | Speculative | 500,000 - 4,999,999 |  | ✔️ |  |  |
-| I | #C99848 | Speculative | 0 - 499,999 |  | ✔️ |  |  |
-| UUU | #DC8C45 | Speculative | 5,000,000+ |  |  | ✔️ |  |
-| UU | #DB8352 | Speculative | 500,000 - 4,999,999 |  |  | ✔️ |  |
-| U | #DB8264 | Speculative | 0 - 499,999 |  |  | ✔️ |  |
-| R | #DB7C76 | Speculative | 0 - 5,000,000+ |  |  |  | ✔️ |
+| AAA | ![AAA](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140819849-AI4DYFOD3YE9HDAQL87T/AAA.png) | Investment | 5,000,000+ | ✔️  |  |  |  |
+| AA | ![AA](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140915257-ILRDLAFM0KR52MGGH9EC/AA.png)  | Investment | 500,000 - 4,999,999 | ✔️  |  |  |  |
+| A | ![A](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140927234-J0KWGPOICB9D4T8BSNAE/A.png) | Investment | 0 - 499,999 | ✔️  |  |  |  |
+| III | ![III](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140945354-PY53A16I1B6468AZJ3PT/III.png) | Speculative | 5,000,000+ |  | ✔️ |  |  |
+| II | ![II](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140958325-PJWQTF3VEPXFRKMZB84L/II.png) | Speculative | 500,000 - 4,999,999 |  | ✔️ |  |  |
+| I | ![I](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140972680-84HH1MP4MVV2P0DCH6NO/I.png) | Speculative | 0 - 499,999 |  | ✔️ |  |  |
+| UUU | ![UUU](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638140991828-MXWKB3MVS9JQSL3FUCMB/UUU.png) | Speculative | 5,000,000+ |  |  | ✔️ |  |
+| UU | ![UU](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638141004015-05O1LHWWKTGWVUFZP3HY/UU.png) | Speculative | 500,000 - 4,999,999 |  |  | ✔️ |  |
+| U | ![U](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638141016865-J6NRTS6BNQ1JR52VJIW9/U.png) | Speculative | 0 - 499,999 |  |  | ✔️ |  |
+| R | ![R](https://images.squarespace-cdn.com/content/v1/611cc8f5b6450924450d8366/1638141029733-015QYH9I0Y2H72F939UR/R.png) | Speculative | 0 - 5,000,000+ |  |  |  | ✔️ |
 
-The rating names differentiate from established bond ratings. Maintaining the minimum collateral payments means the bond is rated in the top speculative grade, while there is a one quarter grace period before dropping to the lowest rating. The NFTs are dynamically updated over time to visualize the current rating through the color hierarchy referred to above:
+The rating names differentiate from established bond ratings. Maintaining the minimum collateral payments means the bond is rated in the top speculative grade, while there is a one quarter grace period before dropping to the lowest rating. The NFTs are dynamically updated over time to visualize the current rating through the color hierarchy referred to above.
 
-![AAA](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-05.svg)![AA](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-02.svg)![A](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-03.svg)![III](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-04.svg)![II](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-05.svg)![I](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-06.svg)![UUU](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-07.svg)![UU](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-08.svg)![U](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-09.svg)![R](https://ipfs.io/ipfs/QmaJ5oKx9QzeFxaJLiuTKzsfRoaujjRd7n3ux6zKXxTkci/Nusic%20Bond%20Fractals/NusicFractal-10.svg)
 
 ## What's next for NUSIC: NFT Music Bonds
 
@@ -56,7 +55,7 @@ In order to maximize the bond coupon rate for NFT holders while minimizing the f
 
 The NUSIC DAO will enable real-world music streaming invoices and/or music catalogs to be provided as collateral, in order to give more security to the bond holders. NUSIC governance will advance the refinement of the bond rating engine, and enable DAO participants to access further music investment opportunities through the strength of the network.
 
-### [Join Us!](https://nusic.fm/join-dao)
+# [Join Us!](https://nusic.fm/join-dao)
 
 
 ## Deployed Addresses on Rinkeby
