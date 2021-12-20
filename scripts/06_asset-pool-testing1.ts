@@ -15,7 +15,7 @@ async function main() {
   await assetPool.deployed();
   console.log("AssetPool deployed to:", assetPool.address);
 
-  const txt = await assetPool.initialize(await owner.getAddress(),BigNumber.from("2000"));
+  const txt = await assetPool.initialize(await owner.getAddress(),ethers.utils.parseEther("2000"));
   console.log("AssetPool Initialized");
   console.log("AssetPool txt.hash =",txt.hash);
 
