@@ -4,8 +4,7 @@
 
 In 1997 David Bowie made history by packaging-up royalties from 25 of his albums as asset-backed securities and issuing them as what has become know as the "Bowie Bonds". Purchased by Prudential Insurance for $55million, the Bowie Bonds enabled the starman to to buy back his entire catalog and yielded a 7.9% APR for Prudential up to maturity a decade later. Imagine the musical renaissance if any artist across the music industry could access such powerful financial instruments...
 
-![Bowie Pound](https://live.staticflickr.com/6179/6204224107_1d29ccbfb3_b.jpg)
-<b>A David Bowie [Brixton ten pound note](https://brixtonpound.org/) honoring the music legend and financial pioneer</b>
+[![NUSIC: NFT Music Bonds](https://scontent-lcy1-1.xx.fbcdn.net/v/t39.30808-6/262910985_2714201448876011_5321133549282659145_n.png?_nc_cat=104&ccb=1-5&_nc_sid=0debeb&_nc_ohc=0sAGXG4e0hoAX9LAvRL&_nc_ht=scontent-lcy1-1.xx&oh=9149dbaf1f9ec710062a0bd6fd021dd2&oe=61B69F1D)](https://youtu.be/jxtqWJucd6k)
 
 Fast-forward to 2021, and while it is increasingly rare for record labels to offer advances to artists, there is more money locked in DeFi than the entire music industry made all year. Just as independent artists leveraged web 2.0 to manage their own distribution and promotion, with web 3.0 there is an opportunity for artists to regain financial control of their careers. NFTs offer the tooling to open-up financing for artists from the fiercely independent, to well-established legacy acts.
 
