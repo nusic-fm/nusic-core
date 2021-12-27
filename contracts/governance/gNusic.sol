@@ -60,4 +60,9 @@ contract gNusic  is ERC1155Supply, Ownable {
         return _name;
     }
 
+    function setPrice(uint256 newPrice) public onlyOwner {
+        require(newPrice > 0, "Price can not be zero");
+        price = newPrice;
+        pricePerFraction = price/MAX_FRACTION_PER_TOKEN;
+    }
 }
