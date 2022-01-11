@@ -12,6 +12,7 @@ contract gNusic is ERC721Enumerable, Ownable {
     uint256 public constant MAX_SUPPLY = 10000;
     uint256 public constant PRESALE_MAX = 1000;
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
+    uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
 
     uint256 public price = 1 ether;
 
@@ -60,6 +61,11 @@ contract gNusic is ERC721Enumerable, Ownable {
 		_;
 	}
 
+    modifier mintPerAddressNotExceed(uint256 tokenQuantity) {
+		require(balanceOf(msg.sender) + tokenQuantity <= MINT_PER_ADDR, 'Exceed Per Address limit');
+		_;
+	}
+
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
@@ -96,7 +102,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
     }
 
-    function preSaleMint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity){
+    function preSaleMint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((preSaleMinted + tokenQuantity) <= PRESALE_MAX, "Pre-Sale Quota will Exceed"); // Total Pre-Sale minted should not exceed Max Pre-Sale allocated
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply"); // Total Minted should not exceed Max Supply
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
@@ -110,7 +116,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         emit PrivateSaleMinted(msg.sender, tokenQuantity, msg.value);
     }
 
-    function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity){
+    function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require(totalSupply() < MAX_SUPPLY, "All tokens have been minted");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply"); // Total Minted should not exceed Max Supply
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
