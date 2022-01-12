@@ -154,6 +154,25 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
     }
 
+    function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
+        require(currentStage == 1, "Stage 1 completed");
+        require(stage1Rounds[currentRound].isActive, "Funding Round not active");
+        require(totalSupply() < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
+        require(totalSupply() + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round ");
+        require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
+        require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
+        
+        if(currentRound == 1 || currentRound == 2) { // For Seed and Private Round user should be in pre-sale list
+            require(preSaleList[msg.sender], "Not Qualified"); // User should be in Pre-Sale list
+        }
+        
+        for(uint16 i=0; i<tokenQuantity; i++) {
+            _safeMint(msg.sender, totalSupply());
+        }
+        emit PrivateSaleMinted(msg.sender, tokenQuantity, msg.value);
+    }
+    
+    /*
     function preSaleMint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((preSaleMinted + tokenQuantity) <= PRESALE_MAX, "Pre-Sale Quota will Exceed"); // Total Pre-Sale minted should not exceed Max Pre-Sale allocated
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply"); // Total Minted should not exceed Max Supply
@@ -167,7 +186,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
         emit PrivateSaleMinted(msg.sender, tokenQuantity, msg.value);
     }
-
+    */
     function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require(totalSupply() < MAX_SUPPLY, "All tokens have been minted");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply"); // Total Minted should not exceed Max Supply
