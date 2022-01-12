@@ -29,25 +29,27 @@ contract gNusic is ERC721Enumerable, Ownable {
     mapping(address => bool) public preSaleList;
 	mapping(address => uint256) public preSaleListPurchases;
     
-    event PrivateSaleMinted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered);
-    event PublicSaleMinted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered);
+    event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
+    event Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 stage);
 
     struct FundingStage {
         uint256 stageNumber; // 1=Stage1 , 2=Stage2, 3=Stage3, 4=Stage4
         uint256 maxSupplyForStage;
         uint256 totalSupplyBeforeCurrentStage;
+        uint256 minted;
         bool isActive;
     }
 
-    struct Stage1Rounds {
+    struct Stage1Round {
         uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
         uint256 maxSupplyForRound;
         uint256 totalSupplyBeforeCurrentRound;
+        uint256 minted;
         bool isActive;
     }
 
     mapping(uint256 => FundingStage) public fundingStages;
-    mapping(uint256 => Stage1Rounds) public stage1Rounds;
+    mapping(uint256 => Stage1Round) public stage1Rounds;
     uint256 currentStage;
     uint256 currentRound;
 
@@ -77,14 +79,14 @@ contract gNusic is ERC721Enumerable, Ownable {
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
 
-        fundingStages[1] = FundingStage(1,1000,0,false);
-        fundingStages[2] = FundingStage(2,1500,1000,false);
-        fundingStages[3] = FundingStage(3,2500,2500,false);
-        fundingStages[4] = FundingStage(4,5000,5000,false);
+        fundingStages[1] = FundingStage(1, 1000, 0, 0, false);
+        fundingStages[2] = FundingStage(2, 1500, 1000, 0, false);
+        fundingStages[3] = FundingStage(3, 2500, 2500, 0, false);
+        fundingStages[4] = FundingStage(4, 5000, 5000, 0, false);
 
-        stage1Rounds[1] = Stage1Rounds(1, 250, 0, false);
-        stage1Rounds[2] = Stage1Rounds(2, 250, 250, false);
-        stage1Rounds[3] = Stage1Rounds(3, 500, 500, false);
+        stage1Rounds[1] = Stage1Round(1, 250, 0, 0, false);
+        stage1Rounds[2] = Stage1Round(2, 250, 250, 0, false);
+        stage1Rounds[3] = Stage1Round(3, 500, 500, 0, false);
     }
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
@@ -97,7 +99,6 @@ contract gNusic is ERC721Enumerable, Ownable {
 		_;
 	}
 
-    
     function ActivateStage(uint256 stageNumber) public onlyOwner {
         require(stageNumber > 0 && stageNumber <= 4, "Invalid Stage");
         require(totalSupply() == fundingStages[stageNumber].totalSupplyBeforeCurrentStage, "Previous Stage incomplete");
@@ -157,9 +158,9 @@ contract gNusic is ERC721Enumerable, Ownable {
     function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require(currentStage == 1 && fundingStages[1].isActive, "Stage 1 completed or Incative");
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
-        require(totalSupply() < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
-        require(totalSupply() + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round ");
-        require(totalSupply() + tokenQuantity <= fundingStages[1].maxSupplyForStage, "Minting would exceed stage's max supply");
+        require(stage1Rounds[currentRound].minted < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
+        require(stage1Rounds[currentRound].minted + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round ");
+        require(totalSupply() + tokenQuantity <= fundingStages[1].maxSupplyForStage, "Minting would exceed stage1's max supply");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         
@@ -168,23 +169,26 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
         
         for(uint16 i=0; i<tokenQuantity; i++) {
+            stage1Rounds[currentRound].minted++;
+            fundingStages[currentStage].minted++;
             _safeMint(msg.sender, totalSupply());
         }
-        emit PrivateSaleMinted(msg.sender, tokenQuantity, msg.value);
+        emit Stage1Minted(msg.sender, tokenQuantity, msg.value, currentRound);
     }
 
     function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
-        require(currentStage != 1, "Stage 1 Incomplete");
+        require(currentStage > 1 && currentStage <= 4, "Invalid Funding Stage");
         require(fundingStages[currentStage].isActive, "Funding Stage not active");
-        require(totalSupply() < fundingStages[currentStage].maxSupplyForStage, "All minted for current stage");
-        require(totalSupply() + tokenQuantity <= fundingStages[currentStage].maxSupplyForStage, "Minting would exceed supply for stage");
+        require(fundingStages[currentStage].minted < fundingStages[currentStage].maxSupplyForStage, "All minted for current stage");
+        require(fundingStages[currentStage].minted + tokenQuantity <= fundingStages[currentStage].maxSupplyForStage, "Minting would exceed supply for stage");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
 
         for(uint16 i=0; i<tokenQuantity; i++) {
+            fundingStages[currentStage].minted++;
             _safeMint(msg.sender, totalSupply());
         }
-        emit PublicSaleMinted(msg.sender, tokenQuantity, msg.value);
+        emit Minted(msg.sender, tokenQuantity, msg.value, currentStage);
     }
 
     /*
