@@ -10,10 +10,12 @@ contract gNusic is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;
-    uint256 public constant TREASURY_SHARE = 50; // In percentage
     uint256 public constant PRESALE_MAX = 1000;
+    uint256 public constant TREASURY_SHARE = 50; // In percentage
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
     uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
+
+    address public tresuryAddress;
 
     uint256 public price = 1 ether;
 
@@ -30,19 +32,25 @@ contract gNusic is ERC721Enumerable, Ownable {
     event PrivateSaleMinted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered);
     event PublicSaleMinted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered);
 
-    enum FundingStages{
-        Stage1, Stage2, Stage3, Stage4
-    }
-    enum Stage1Rounds{
-        SeedRound, PrivateRound, PublicRound
+    struct FundingStage {
+        uint256 stageNumber; // 1=Stage1 , 2=Stage2, 3=Stage3, 4=Stage4
+        uint256 maxSupplyForStage;
+        uint256 totalSupplyBeforeCurrentStage;
+        bool isActive;
     }
 
-    mapping(FundingStages=>uint256) public fundingStages;
-    FundingStages currentlyActiveStage;
+    struct Stage1Rounds {
+        uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
+        uint256 maxSupplyForRound;
+        uint256 totalSupplyBeforeCurrentRound;
+        bool isActive;
+    }
 
-    mapping(Stage1Rounds=>uint256) public stage1Rounds;
-    Stage1Rounds currentlyActiveRound;
-    
+    mapping(uint256 => FundingStage) public fundingStages;
+    mapping(uint256 => Stage1Rounds) public stage1Rounds;
+    uint256 currentStage;
+    uint256 currentRound;
+
     // Properties and Events related to voting power delegation -- Start
     // @notice A record of states for signing / validating signatures
     mapping (address => uint) private nonces;
@@ -68,17 +76,16 @@ contract gNusic is ERC721Enumerable, Ownable {
 
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
-        fundingStages[FundingStages.Stage1] = 1000;
-        fundingStages[FundingStages.Stage2] = 1500;
-        fundingStages[FundingStages.Stage3] = 2500;
-        fundingStages[FundingStages.Stage4] = 5000;
 
-        stage1Rounds[Stage1Rounds.SeedRound] = 250;
-        stage1Rounds[Stage1Rounds.PrivateRound] = 250;
-        stage1Rounds[Stage1Rounds.PublicRound] = 500;
+        fundingStages[1] = FundingStage(1,1000,0,false);
+        fundingStages[2] = FundingStage(2,1500,1000,false);
+        fundingStages[3] = FundingStage(3,2500,2500,false);
+        fundingStages[4] = FundingStage(4,5000,5000,false);
+
+        stage1Rounds[1] = Stage1Rounds(1, 250, 0, false);
+        stage1Rounds[2] = Stage1Rounds(2, 250, 250, false);
+        stage1Rounds[3] = Stage1Rounds(3, 500, 500, false);
     }
-
-
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
 		require(tokenQuantity <= MINT_PER_TXT, 'Exceed Per Txt limit');
@@ -89,6 +96,27 @@ contract gNusic is ERC721Enumerable, Ownable {
 		require(balanceOf(msg.sender) + tokenQuantity <= MINT_PER_ADDR, 'Exceed Per Address limit');
 		_;
 	}
+
+    
+    function ActivateStage(uint256 stageNumber) public onlyOwner {
+        require(stageNumber > 0 && stageNumber <= 4, "Invalid Stage");
+        require(totalSupply() == fundingStages[stageNumber].totalSupplyBeforeCurrentStage, "Previous Stage incomplete");
+        if(stageNumber > 1) {
+            fundingStages[stageNumber-1].isActive = false;
+        }
+        fundingStages[stageNumber].isActive = true;
+        currentStage = stageNumber;
+    }
+
+    function ActivateRound(uint256 roundNumber) public onlyOwner {
+        require(roundNumber > 0 && roundNumber <= 3, "Invalid Round");
+        require(totalSupply() == stage1Rounds[roundNumber].totalSupplyBeforeCurrentRound, "Previous Round incomplete");
+        if(roundNumber > 1) {
+            stage1Rounds[roundNumber-1].isActive = false;
+        }
+        stage1Rounds[roundNumber].isActive = true;
+        currentRound = roundNumber;
+    }
 
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
