@@ -155,10 +155,11 @@ contract gNusic is ERC721Enumerable, Ownable {
     }
 
     function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
-        require(currentStage == 1, "Stage 1 completed");
+        require(currentStage == 1 && fundingStages[1].isActive, "Stage 1 completed or Incative");
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
         require(totalSupply() < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
         require(totalSupply() + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round ");
+        require(totalSupply() + tokenQuantity <= fundingStages[1].maxSupplyForStage, "Minting would exceed stage's max supply");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         
@@ -171,7 +172,21 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
         emit PrivateSaleMinted(msg.sender, tokenQuantity, msg.value);
     }
-    
+
+    function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
+        require(currentStage != 1, "Stage 1 Incomplete");
+        require(fundingStages[currentStage].isActive, "Funding Stage not active");
+        require(totalSupply() < fundingStages[currentStage].maxSupplyForStage, "All minted for current stage");
+        require(totalSupply() + tokenQuantity <= fundingStages[currentStage].maxSupplyForStage, "Minting would exceed supply for stage");
+        require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
+        require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
+
+        for(uint16 i=0; i<tokenQuantity; i++) {
+            _safeMint(msg.sender, totalSupply());
+        }
+        emit PublicSaleMinted(msg.sender, tokenQuantity, msg.value);
+    }
+
     /*
     function preSaleMint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((preSaleMinted + tokenQuantity) <= PRESALE_MAX, "Pre-Sale Quota will Exceed"); // Total Pre-Sale minted should not exceed Max Pre-Sale allocated
@@ -187,6 +202,8 @@ contract gNusic is ERC721Enumerable, Ownable {
         emit PrivateSaleMinted(msg.sender, tokenQuantity, msg.value);
     }
     */
+
+    /*
     function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require(totalSupply() < MAX_SUPPLY, "All tokens have been minted");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply"); // Total Minted should not exceed Max Supply
@@ -198,6 +215,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
         emit PublicSaleMinted(msg.sender, tokenQuantity, msg.value);
     }
+    */
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         super._beforeTokenTransfer(from, to, tokenId);
