@@ -10,6 +10,7 @@ contract gNusic is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;
+    uint256 public constant TREASURY_SHARE = 50; // In percentage
     uint256 public constant PRESALE_MAX = 1000;
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
     uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
@@ -29,6 +30,19 @@ contract gNusic is ERC721Enumerable, Ownable {
     event PrivateSaleMinted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered);
     event PublicSaleMinted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered);
 
+    enum FundingStages{
+        Stage1, Stage2, Stage3, Stage4
+    }
+    enum Stage1Rounds{
+        SeedRound, PrivateRound, PublicRound
+    }
+
+    mapping(FundingStages=>uint256) public fundingStages;
+    FundingStages currentlyActiveStage;
+
+    mapping(Stage1Rounds=>uint256) public stage1Rounds;
+    Stage1Rounds currentlyActiveRound;
+    
     // Properties and Events related to voting power delegation -- Start
     // @notice A record of states for signing / validating signatures
     mapping (address => uint) private nonces;
@@ -54,7 +68,17 @@ contract gNusic is ERC721Enumerable, Ownable {
 
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
+        fundingStages[FundingStages.Stage1] = 1000;
+        fundingStages[FundingStages.Stage2] = 1500;
+        fundingStages[FundingStages.Stage3] = 2500;
+        fundingStages[FundingStages.Stage4] = 5000;
+
+        stage1Rounds[Stage1Rounds.SeedRound] = 250;
+        stage1Rounds[Stage1Rounds.PrivateRound] = 250;
+        stage1Rounds[Stage1Rounds.PublicRound] = 500;
     }
+
+
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
 		require(tokenQuantity <= MINT_PER_TXT, 'Exceed Per Txt limit');
