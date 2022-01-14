@@ -103,7 +103,7 @@ contract gNusic is ERC721Enumerable, Ownable {
 
     function activateStage(uint256 stageNumber) public onlyOwner {
         require(stageNumber > 0 && stageNumber <= 4, "Invalid Stage");
-        require(totalSupply() == fundingStages[stageNumber].totalSupplyBeforeCurrentStage, "Previous Stage incomplete");
+        require(totalSupply() >= fundingStages[stageNumber].totalSupplyBeforeCurrentStage, "Previous Stage incomplete");
         if(stageNumber > 1) {
             fundingStages[stageNumber-1].isActive = false;
         }
@@ -111,14 +111,22 @@ contract gNusic is ERC721Enumerable, Ownable {
         currentStage = stageNumber;
     }
 
+    function deactivateCurrentStage() public onlyOwner {
+        fundingStages[currentStage].isActive = false;
+    }
+
     function activateRound(uint256 roundNumber) public onlyOwner {
         require(roundNumber > 0 && roundNumber <= 3, "Invalid Round");
-        require(totalSupply() == stage1Rounds[roundNumber].totalSupplyBeforeCurrentRound, "Previous Round incomplete");
+        require(totalSupply() >= stage1Rounds[roundNumber].totalSupplyBeforeCurrentRound, "Previous Round incomplete");
         if(roundNumber > 1) {
             stage1Rounds[roundNumber-1].isActive = false;
         }
         stage1Rounds[roundNumber].isActive = true;
         currentRound = roundNumber;
+    }
+
+    function deactivateCurrentRound() public onlyOwner {
+        stage1Rounds[currentRound].isActive = false;
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
@@ -205,6 +213,11 @@ contract gNusic is ERC721Enumerable, Ownable {
             _safeMint(tresuryAddress, totalMinted);
         }
         emit TreasuryClaim(tresuryAddress, tokenQuantity);
+    }
+
+    function setTreasuryAddress(address newTreasuryAddress) public onlyOwner {
+        require(newTreasuryAddress != address(0),"NULL Address Provided");
+        tresuryAddress = newTreasuryAddress;
     }
 
     function withdraw() public onlyOwner {
