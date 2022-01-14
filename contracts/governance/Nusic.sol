@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract gNusic is ERC721Enumerable, Ownable {
+contract Nusic is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;

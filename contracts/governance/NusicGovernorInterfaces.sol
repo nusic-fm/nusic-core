@@ -58,6 +58,6 @@ interface TimelockInterface {
     function executeTransaction(address target, uint value, string calldata signature, bytes calldata data, uint eta) external payable returns (bytes memory);
 }
 
-interface gNusicInterface {
+interface NusicInterface {
     function getPriorVotes(address account, uint blockNumber) external view returns (uint256);
 }

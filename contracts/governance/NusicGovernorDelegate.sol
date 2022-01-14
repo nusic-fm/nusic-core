@@ -35,21 +35,21 @@ contract NusicGovernorDelegate is NusicGovernorCore, NusicGovernorEvents {
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
     TimelockInterface timelock;
-    gNusicInterface gnusic;
+    NusicInterface nusic;
 
 
-    function initialize(address _timelock, address _gnusic, uint _votingPeriod, uint _votingDelay, uint _proposalThreshold) public onlyAdmin {
+    function initialize(address _timelock, address _nusic, uint _votingPeriod, uint _votingDelay, uint _proposalThreshold) public onlyAdmin {
         require(address(timelock) == address(0), "NusicGovernor::initialize: can only initialize once");
         // Not needed at this point as already used onlyAdmin modifier
         //require(msg.sender == admin, "NusicGovernor::initialize: admin only");
         require(_timelock != address(0), "NusicGovernor::initialize: invalid timelock address");
-        require(_gnusic != address(0), "NusicGovernor::initialize: invalid gNusic address");
+        require(_nusic != address(0), "NusicGovernor::initialize: invalid Nusic address");
         require(_votingPeriod >= MIN_VOTING_PERIOD && _votingPeriod <= MAX_VOTING_PERIOD, "NusicGovernor::initialize: invalid voting period");
         require(_votingDelay >= MIN_VOTING_DELAY && _votingDelay <= MAX_VOTING_DELAY, "NusicGovernor::initialize: invalid voting delay");
         require(_proposalThreshold >= MIN_PROPOSAL_THRESHOLD && _proposalThreshold <= MAX_PROPOSAL_THRESHOLD, "NusicGovernor::initialize: invalid proposal threshold");
 
         timelock = TimelockInterface(_timelock);
-        gnusic = gNusicInterface(_gnusic);
+        nusic = NusicInterface(_nusic);
 
         votingPeriod = _votingPeriod;
         votingDelay = _votingDelay;
@@ -60,7 +60,7 @@ contract NusicGovernorDelegate is NusicGovernorCore, NusicGovernorEvents {
     function propose(address[] memory targets, uint[] memory values, string[] memory signatures, bytes[] memory calldatas, string memory description) public returns (uint) {
         
         // Allow addresses above proposal threshold and whitelisted addresses to propose
-        require(gnusic.getPriorVotes(msg.sender, (block.number - 1)) > proposalThreshold || isWhitelisted(msg.sender), "NusicGovernor::propose: proposer votes below proposal threshold");
+        require(nusic.getPriorVotes(msg.sender, (block.number - 1)) > proposalThreshold || isWhitelisted(msg.sender), "NusicGovernor::propose: proposer votes below proposal threshold");
         require(targets.length == values.length && targets.length == signatures.length && targets.length == calldatas.length, "NusicGovernor::propose: proposal function information arity mismatch");
         require(targets.length != 0, "NusicGovernor::propose: must provide actions");
         require(targets.length <= proposalMaxOperations, "NusicGovernor::propose: too many actions");
@@ -147,10 +147,10 @@ contract NusicGovernorDelegate is NusicGovernorCore, NusicGovernorEvents {
         if(msg.sender != proposal.proposer) {
             // Whitelisted proposers can't be canceled for falling below proposal threshold
             if(isWhitelisted(proposal.proposer)) {
-                require((gnusic.getPriorVotes(proposal.proposer, (block.number - 1)) < proposalThreshold) && msg.sender == whitelistGuardian, "NusicGovernor::cancel: whitelisted proposer");
+                require((nusic.getPriorVotes(proposal.proposer, (block.number - 1)) < proposalThreshold) && msg.sender == whitelistGuardian, "NusicGovernor::cancel: whitelisted proposer");
             }
             else {
-                require((gnusic.getPriorVotes(proposal.proposer, (block.number - 1)) < proposalThreshold), "NusicGovernor::cancel: proposer above threshold");
+                require((nusic.getPriorVotes(proposal.proposer, (block.number - 1)) < proposalThreshold), "NusicGovernor::cancel: proposer above threshold");
             }
         }
         
@@ -232,7 +232,7 @@ contract NusicGovernorDelegate is NusicGovernorCore, NusicGovernorEvents {
         Proposal storage proposal = proposals[proposalId];
         Receipt storage receipt = proposal.receipts[voter];
         require(receipt.hasVoted == false, "NusicGovernor::castVoteInternal: voter already voted");
-        uint256 votes = gnusic.getPriorVotes(voter, proposal.startBlock);
+        uint256 votes = nusic.getPriorVotes(voter, proposal.startBlock);
 
         if (support == 0) {
             proposal.againstVotes = (proposal.againstVotes + votes);
