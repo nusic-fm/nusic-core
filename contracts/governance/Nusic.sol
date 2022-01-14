@@ -13,6 +13,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
     uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
     uint256 public constant MAX_PRE_SEED_SUPPLY = 25;
+    uint256 public constant STAGE1_MAX_SUPPLY = 1000;
 
     address public tresuryAddress = address(0);
 
@@ -26,19 +27,8 @@ contract Nusic is ERC721Enumerable, Ownable {
     uint256 public totalMinted = 25;
     
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
-    event Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 stage);
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
-    event TreasuryClaim(address indexed to, uint256 tokenQuantity);
-
-    struct FundingStage {
-        uint256 stageNumber; // 1=Stage1 , 2=Stage2, 3=Stage3, 4=Stage4
-        uint256 totalSupplyBeforeCurrentStage;
-        uint256 maxSupplyForStage;
-        uint256 minted;
-        uint256 maxTreasuryShare;
-        uint256 treasuryClaimed;
-        bool isActive;
-    }
+    event TreasuryClaimed(address indexed to, uint256 tokenQuantity);
 
     struct Stage1Round {
         uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
@@ -50,9 +40,7 @@ contract Nusic is ERC721Enumerable, Ownable {
         bool isActive;
     }
 
-    mapping(uint256 => FundingStage) public fundingStages;
     mapping(uint256 => Stage1Round) public stage1Rounds;
-    uint256 currentStage;
     uint256 currentRound;
 
     // Properties and Events related to voting power delegation -- Start
@@ -81,11 +69,6 @@ contract Nusic is ERC721Enumerable, Ownable {
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
 
-        fundingStages[1] = FundingStage(1,0, 500, 0,  500,0, false);
-        fundingStages[2] = FundingStage(2,1000, 750, 0, 750, 0, false);
-        fundingStages[3] = FundingStage(3,2500, 1250, 0, 1250, 0, false);
-        fundingStages[4] = FundingStage(4,5000, 2500, 0, 2500, 0, false);
-
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 500, 0, false);
@@ -100,20 +83,6 @@ contract Nusic is ERC721Enumerable, Ownable {
 		require(balanceOf(msg.sender) + tokenQuantity <= MINT_PER_ADDR, 'Exceed Per Address limit');
 		_;
 	}
-
-    function activateStage(uint256 stageNumber) public onlyOwner {
-        require(stageNumber > 0 && stageNumber <= 4, "Invalid Stage");
-        require(totalSupply() >= fundingStages[stageNumber].totalSupplyBeforeCurrentStage, "Previous Stage incomplete");
-        if(stageNumber > 1) {
-            fundingStages[stageNumber-1].isActive = false;
-        }
-        fundingStages[stageNumber].isActive = true;
-        currentStage = stageNumber;
-    }
-
-    function deactivateCurrentStage() public onlyOwner {
-        fundingStages[currentStage].isActive = false;
-    }
 
     function activateRound(uint256 roundNumber) public onlyOwner {
         require(roundNumber > 0 && roundNumber <= 3, "Invalid Round");
@@ -152,37 +121,18 @@ contract Nusic is ERC721Enumerable, Ownable {
     }
 
     function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
-        require(currentStage == 1 && fundingStages[1].isActive, "Stage 1 completed or Incative");
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
         require(stage1Rounds[currentRound].minted < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
         require(stage1Rounds[currentRound].minted + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round");
-        require(totalSupply() + tokenQuantity <= fundingStages[1].maxSupplyForStage + fundingStages[1].maxTreasuryShare, "Minting would exceed stage1's max supply");
-        require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
+        require(totalMinted + tokenQuantity <= STAGE1_MAX_SUPPLY, "Minting would exceed stage1's max supply");
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].minted++;
-            fundingStages[currentStage].minted++;
             totalMinted++;
             _safeMint(msg.sender, totalMinted);
         }
         emit Stage1Minted(msg.sender, tokenQuantity, msg.value, currentRound);
-    }
-
-    function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
-        require(currentStage > 1 && currentStage <= 4, "Invalid Funding Stage");
-        require(fundingStages[currentStage].isActive, "Funding Stage not active");
-        require(fundingStages[currentStage].minted < fundingStages[currentStage].maxSupplyForStage, "All minted for current stage");
-        require(fundingStages[currentStage].minted + tokenQuantity <= fundingStages[currentStage].maxSupplyForStage, "Minting would exceed supply for stage");
-        require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
-        require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
-
-        for(uint16 i=0; i<tokenQuantity; i++) {
-            fundingStages[currentStage].minted++;
-            totalMinted++;
-            _safeMint(msg.sender, totalMinted);
-        }
-        emit Minted(msg.sender, tokenQuantity, msg.value, currentStage);
     }
 
     function preSeedMint(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
@@ -197,22 +147,15 @@ contract Nusic is ERC721Enumerable, Ownable {
     }
 
     function treasuryClaim(uint256 tokenQuantity) public onlyOwner{
-        if(currentStage == 1) {
-            require(stage1Rounds[currentRound].treasuryClaimed < stage1Rounds[currentRound].maxTreasuryShare, "All Claimed for current round");
-            require(stage1Rounds[currentRound].treasuryClaimed + tokenQuantity <= stage1Rounds[currentRound].maxTreasuryShare, "Claim would exceed supply for round");
-        }
-        else {
-            require(fundingStages[currentStage].treasuryClaimed < fundingStages[currentStage].maxTreasuryShare, "All Claimed for current stage");
-            require(fundingStages[currentStage].treasuryClaimed + tokenQuantity <= fundingStages[currentStage].maxTreasuryShare, "Claim would exceed supply for stage");
-        }
+        require(stage1Rounds[currentRound].treasuryClaimed < stage1Rounds[currentRound].maxTreasuryShare, "All Claimed for current round");
+        require(stage1Rounds[currentRound].treasuryClaimed + tokenQuantity <= stage1Rounds[currentRound].maxTreasuryShare, "Claim would exceed supply for round");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].treasuryClaimed++;
-            fundingStages[currentStage].treasuryClaimed++;
             totalMinted++;
             _safeMint(tresuryAddress, totalMinted);
         }
-        emit TreasuryClaim(tresuryAddress, tokenQuantity);
+        emit TreasuryClaimed(tresuryAddress, tokenQuantity);
     }
 
     function setTreasuryAddress(address newTreasuryAddress) public onlyOwner {
