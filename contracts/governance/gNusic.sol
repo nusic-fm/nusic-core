@@ -14,8 +14,9 @@ contract gNusic is ERC721Enumerable, Ownable {
     uint256 public constant TREASURY_SHARE = 50; // In percentage
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
     uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
+    uint256 public constant MAX_PRE_SEED_SUPPLY = 25;
 
-    address public tresuryAddress;
+    address public tresuryAddress = address(0);
 
     uint256 public price = 1 ether;
 
@@ -26,25 +27,33 @@ contract gNusic is ERC721Enumerable, Ownable {
     uint256 public preSaleMinted;
     uint256 public publicSaleMinted;
 
+    uint256 public preSeedMinted;
+
     mapping(address => bool) public preSaleList;
 	mapping(address => uint256) public preSaleListPurchases;
     
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 stage);
+    event PreSeedMinted(address indexed to, uint256 tokenQuantity);
+
 
     struct FundingStage {
         uint256 stageNumber; // 1=Stage1 , 2=Stage2, 3=Stage3, 4=Stage4
-        uint256 maxSupplyForStage;
         uint256 totalSupplyBeforeCurrentStage;
+        uint256 maxSupplyForStage;
         uint256 minted;
+        uint256 maxTreasuryShare;
+        uint256 treasuryClaimed;
         bool isActive;
     }
 
     struct Stage1Round {
         uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
-        uint256 maxSupplyForRound;
         uint256 totalSupplyBeforeCurrentRound;
+        uint256 maxSupplyForRound;
         uint256 minted;
+        uint256 maxTreasuryShare;
+        uint256 treasuryClaimed;
         bool isActive;
     }
 
@@ -79,14 +88,14 @@ contract gNusic is ERC721Enumerable, Ownable {
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
 
-        fundingStages[1] = FundingStage(1, 1000, 0, 0, false);
-        fundingStages[2] = FundingStage(2, 1500, 1000, 0, false);
-        fundingStages[3] = FundingStage(3, 2500, 2500, 0, false);
-        fundingStages[4] = FundingStage(4, 5000, 5000, 0, false);
+        fundingStages[1] = FundingStage(1,0, 500, 0,  500,0, false);
+        fundingStages[2] = FundingStage(2,1000, 750, 0, 750, 0, false);
+        fundingStages[3] = FundingStage(3,2500, 1250, 0, 1250, 0, false);
+        fundingStages[4] = FundingStage(4,5000, 2500, 0, 2500, 0, false);
 
-        stage1Rounds[1] = Stage1Round(1, 250, 0, 0, false);
-        stage1Rounds[2] = Stage1Round(2, 250, 250, 0, false);
-        stage1Rounds[3] = Stage1Round(3, 500, 500, 0, false);
+        stage1Rounds[1] = Stage1Round(1, 0, 125, 0, 125, 0, false);
+        stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
+        stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 500, 0, false);
     }
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
@@ -160,13 +169,9 @@ contract gNusic is ERC721Enumerable, Ownable {
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
         require(stage1Rounds[currentRound].minted < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
         require(stage1Rounds[currentRound].minted + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round ");
-        require(totalSupply() + tokenQuantity <= fundingStages[1].maxSupplyForStage, "Minting would exceed stage1's max supply");
+        require(totalSupply() + tokenQuantity <= fundingStages[1].maxSupplyForStage + fundingStages[1].maxTreasuryShare, "Minting would exceed stage1's max supply");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
-        
-        if(currentRound == 1 || currentRound == 2) { // For Seed and Private Round user should be in pre-sale list
-            require(preSaleList[msg.sender], "Not Qualified"); // User should be in Pre-Sale list
-        }
         
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].minted++;
@@ -190,6 +195,19 @@ contract gNusic is ERC721Enumerable, Ownable {
         }
         emit Minted(msg.sender, tokenQuantity, msg.value, currentStage);
     }
+
+    function preSeedMint(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
+        require(to != address(0),"NULL Address Provided");
+        require((preSeedMinted + tokenQuantity) <= MAX_PRE_SEED_SUPPLY,"Minting will exceed PreSeed supply");
+                
+        for(uint16 i=0; i<tokenQuantity; i++) {
+            _safeMint(to, totalSupply());
+            preSeedMinted++;
+        }
+        emit PreSeedMinted(to, tokenQuantity);
+    }
+
+
 
     /*
     function preSaleMint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
