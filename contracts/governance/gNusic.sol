@@ -10,8 +10,6 @@ contract gNusic is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;
-    uint256 public constant PRESALE_MAX = 1000;
-    uint256 public constant TREASURY_SHARE = 50; // In percentage
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
     uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
     uint256 public constant MAX_PRE_SEED_SUPPLY = 25;
@@ -25,6 +23,7 @@ contract gNusic is ERC721Enumerable, Ownable {
     string public baseURI;
 
     uint256 public preSeedMinted;
+    uint256 public totalMinted = 25;
     
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 stage);
@@ -87,7 +86,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         fundingStages[3] = FundingStage(3,2500, 1250, 0, 1250, 0, false);
         fundingStages[4] = FundingStage(4,5000, 2500, 0, 2500, 0, false);
 
-        stage1Rounds[1] = Stage1Round(1, 0, 125, 0, 125, 0, false);
+        stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 500, 0, false);
     }
@@ -102,7 +101,7 @@ contract gNusic is ERC721Enumerable, Ownable {
 		_;
 	}
 
-    function ActivateStage(uint256 stageNumber) public onlyOwner {
+    function activateStage(uint256 stageNumber) public onlyOwner {
         require(stageNumber > 0 && stageNumber <= 4, "Invalid Stage");
         require(totalSupply() == fundingStages[stageNumber].totalSupplyBeforeCurrentStage, "Previous Stage incomplete");
         if(stageNumber > 1) {
@@ -112,7 +111,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         currentStage = stageNumber;
     }
 
-    function ActivateRound(uint256 roundNumber) public onlyOwner {
+    function activateRound(uint256 roundNumber) public onlyOwner {
         require(roundNumber > 0 && roundNumber <= 3, "Invalid Round");
         require(totalSupply() == stage1Rounds[roundNumber].totalSupplyBeforeCurrentRound, "Previous Round incomplete");
         if(roundNumber > 1) {
@@ -156,7 +155,8 @@ contract gNusic is ERC721Enumerable, Ownable {
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].minted++;
             fundingStages[currentStage].minted++;
-            _safeMint(msg.sender, totalSupply());
+            totalMinted++;
+            _safeMint(msg.sender, totalMinted);
         }
         emit Stage1Minted(msg.sender, tokenQuantity, msg.value, currentRound);
     }
@@ -171,7 +171,8 @@ contract gNusic is ERC721Enumerable, Ownable {
 
         for(uint16 i=0; i<tokenQuantity; i++) {
             fundingStages[currentStage].minted++;
-            _safeMint(msg.sender, totalSupply());
+            totalMinted++;
+            _safeMint(msg.sender, totalMinted);
         }
         emit Minted(msg.sender, tokenQuantity, msg.value, currentStage);
     }
@@ -181,7 +182,7 @@ contract gNusic is ERC721Enumerable, Ownable {
         require((preSeedMinted + tokenQuantity) <= MAX_PRE_SEED_SUPPLY,"Minting will exceed PreSeed supply");
                 
         for(uint16 i=0; i<tokenQuantity; i++) {
-            _safeMint(to, totalSupply());
+            _safeMint(to, preSeedMinted+1);
             preSeedMinted++;
         }
         emit PreSeedMinted(to, tokenQuantity);
@@ -200,9 +201,15 @@ contract gNusic is ERC721Enumerable, Ownable {
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].treasuryClaimed++;
             fundingStages[currentStage].treasuryClaimed++;
-            _safeMint(tresuryAddress, totalSupply());
+            totalMinted++;
+            _safeMint(tresuryAddress, totalMinted);
         }
         emit TreasuryClaim(tresuryAddress, tokenQuantity);
+    }
+
+    function withdraw() public onlyOwner {
+        (bool sent, bytes memory data) = tresuryAddress.call{value: address(this).balance}("");
+        require(sent, "Failed to withdraw Ether");
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
