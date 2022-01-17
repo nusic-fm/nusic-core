@@ -17,7 +17,7 @@ contract Nusic is ERC721Enumerable, Ownable {
 
     address public tresuryAddress = address(0);
 
-    uint256 public price = 1 ether;
+    uint256 public price = 0.04 ether;
 
     // URI to be used before Reveal
     string public defaultURI;
