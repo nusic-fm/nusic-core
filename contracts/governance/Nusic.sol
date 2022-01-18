@@ -11,7 +11,7 @@ contract Nusic is ERC721Enumerable, Ownable {
 
     uint256 public constant MAX_SUPPLY = 10000;
     uint256 public constant MINT_PER_TXT = 5; // Mint per Transaction
-    uint256 public constant MINT_PER_ADDR = 100; // Mint per Address
+    uint256 public constant MINT_PER_ADDR = 10; // Mint per Address
     uint256 public constant MAX_PRE_SEED_SUPPLY = 25;
     uint256 public constant STAGE1_MAX_SUPPLY = 1000;
 
@@ -25,10 +25,13 @@ contract Nusic is ERC721Enumerable, Ownable {
 
     uint256 public preSeedMinted;
     uint256 public totalMinted = 25;
+
+    bool public publicMintingAllowed = false;
     
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
-    event TreasuryClaimed(address indexed to, uint256 tokenQuantity);
+    event TreasuryClaimed(address indexed to, uint256 tokenQuantity, uint256 round);
+    event PublicMinted(address indexed to, uint256 tokenQuantity, uint256 round);
 
     struct Stage1Round {
         uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
@@ -98,6 +101,11 @@ contract Nusic is ERC721Enumerable, Ownable {
         stage1Rounds[currentRound].isActive = false;
     }
 
+    function activateCurrentRound() public onlyOwner {
+        require(currentRound > 0 && currentRound <= 3, "Invalid Round");
+        stage1Rounds[currentRound].isActive = true;
+    }
+
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
@@ -120,18 +128,30 @@ contract Nusic is ERC721Enumerable, Ownable {
         price = newPrice;
     }
 
-    function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
+    function togglePublicMinting() public {
+        publicMintingAllowed = !publicMintingAllowed;
+    }
+
+    function mintInternal(uint256 tokenQuantity, address to) private {
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
         require(stage1Rounds[currentRound].minted < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
         require(stage1Rounds[currentRound].minted + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round");
         require(totalMinted + tokenQuantity <= STAGE1_MAX_SUPPLY, "Minting would exceed stage1's max supply");
-        require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].minted++;
             totalMinted++;
-            _safeMint(msg.sender, totalMinted);
+            _safeMint(to, totalMinted);
         }
+    }
+
+    function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
+        require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
+        if(currentRound == 3) {
+            require(publicMintingAllowed, "Public Round minting is not allowed");
+        }
+        
+        mintInternal(tokenQuantity, msg.sender);
         emit Stage1Minted(msg.sender, tokenQuantity, msg.value, currentRound);
     }
 
@@ -146,6 +166,12 @@ contract Nusic is ERC721Enumerable, Ownable {
         emit PreSeedMinted(to, tokenQuantity);
     }
 
+    function publicAuctionTransfer(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
+        require(currentRound == 3, "Not public round");
+        mintInternal(tokenQuantity, to);
+        emit PublicMinted(to, tokenQuantity, currentRound);
+    }
+
     function treasuryClaim(uint256 tokenQuantity) public onlyOwner{
         require(stage1Rounds[currentRound].treasuryClaimed < stage1Rounds[currentRound].maxTreasuryShare, "All Claimed for current round");
         require(stage1Rounds[currentRound].treasuryClaimed + tokenQuantity <= stage1Rounds[currentRound].maxTreasuryShare, "Claim would exceed supply for round");
@@ -155,7 +181,7 @@ contract Nusic is ERC721Enumerable, Ownable {
             totalMinted++;
             _safeMint(tresuryAddress, totalMinted);
         }
-        emit TreasuryClaimed(tresuryAddress, tokenQuantity);
+        emit TreasuryClaimed(tresuryAddress, tokenQuantity,currentRound);
     }
 
     function setTreasuryAddress(address newTreasuryAddress) public onlyOwner {
