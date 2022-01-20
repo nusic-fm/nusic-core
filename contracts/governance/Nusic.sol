@@ -74,7 +74,7 @@ contract Nusic is ERC721Enumerable, Ownable {
 
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
-        stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 500, 0, false);
+        stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 250, 0, false);
     }
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
@@ -160,8 +160,8 @@ contract Nusic is ERC721Enumerable, Ownable {
         require((preSeedMinted + tokenQuantity) <= MAX_PRE_SEED_SUPPLY,"Minting will exceed PreSeed supply");
                 
         for(uint16 i=0; i<tokenQuantity; i++) {
-            _safeMint(to, preSeedMinted+1);
             preSeedMinted++;
+            _safeMint(to, preSeedMinted);
         }
         emit PreSeedMinted(to, tokenQuantity);
     }
