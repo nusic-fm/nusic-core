@@ -37,4 +37,15 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     await expect((nusic.connect(addr1).stage1Mint(1, {value: amount}))).to.be.revertedWith("Funding Round not active");
   });
 
+  it("Pre-seed minting should fail when Non-owner call it", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    await expect((nusic.connect(addr1).preSeedMint(3, addr1.address))).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("Pre-seed minting should even no round is active", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).preSeedMint(3, addr1.address))).to.be.ok;
+    expect(await (nusic.connect(owner).preSeedMinted())).to.be.equal(3);
+  });
+
 });
