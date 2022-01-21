@@ -27,11 +27,13 @@ contract Nusic is ERC721Enumerable, Ownable {
     uint256 public totalMinted = 25;
 
     bool public publicMintingAllowed = false;
+    bool public verifyWhitelist = false;
+    mapping(address => bool) public publicSaleWhitelist;
     
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
     event TreasuryClaimed(address indexed to, uint256 tokenQuantity, uint256 round);
-    event PublicMinted(address indexed to, uint256 tokenQuantity, uint256 round);
+    event PublicTransferMinted(address indexed to, uint256 tokenQuantity, uint256 round);
 
     struct Stage1Round {
         uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
@@ -128,8 +130,26 @@ contract Nusic is ERC721Enumerable, Ownable {
         price = newPrice;
     }
 
-    function togglePublicMinting() public {
+    function addToWhitelist(address[] memory addressList) public onlyOwner {
+        for (uint256 i = 0; i < addressList.length; i++) {
+            require(addressList[i] != address(0),"NULL Address Provided");
+            publicSaleWhitelist[addressList[i]] = true;
+        }
+    }
+
+    function removeFromWhitelist(address[] memory addressList) public onlyOwner{
+        for (uint256 i = 0; i < addressList.length; i++) {
+            require(addressList[i] != address(0),"NULL Address Provided");
+            delete publicSaleWhitelist[addressList[i]];
+        }
+    }
+
+    function togglePublicMinting() public onlyOwner{
         publicMintingAllowed = !publicMintingAllowed;
+    }
+
+    function toggleVerifyWhitelist() public onlyOwner{
+        verifyWhitelist = !verifyWhitelist;
     }
 
     function mintInternal(uint256 tokenQuantity, address to) private {
@@ -148,7 +168,10 @@ contract Nusic is ERC721Enumerable, Ownable {
     function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         if(currentRound == 3) {
-            require(publicMintingAllowed, "Public Round minting is not allowed");
+            require(publicMintingAllowed, "Minting not allowed");    
+            if(verifyWhitelist) {
+                require(publicSaleWhitelist[msg.sender], "Not Qualified");
+            }
         }
         
         mintInternal(tokenQuantity, msg.sender);
@@ -169,10 +192,11 @@ contract Nusic is ERC721Enumerable, Ownable {
     function publicAuctionTransfer(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
         require(currentRound == 3, "Not public round");
         mintInternal(tokenQuantity, to);
-        emit PublicMinted(to, tokenQuantity, currentRound);
+        emit PublicTransferMinted(to, tokenQuantity, currentRound);
     }
 
     function treasuryClaim(uint256 tokenQuantity) public onlyOwner{
+        require(tresuryAddress != address(0),"NULL Address Provided");
         require(stage1Rounds[currentRound].treasuryClaimed < stage1Rounds[currentRound].maxTreasuryShare, "All Claimed for current round");
         require(stage1Rounds[currentRound].treasuryClaimed + tokenQuantity <= stage1Rounds[currentRound].maxTreasuryShare, "Claim would exceed supply for round");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
