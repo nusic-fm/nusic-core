@@ -7,7 +7,7 @@ import { Nusic, Nusic__factory } from '../typechain';
 async function main() {
   const [owner, add1] = await ethers.getSigners();
   const Nusic:Nusic__factory = await ethers.getContractFactory("Nusic");
-  const nusic:Nusic = await Nusic.attach("0xF7789e4e393597DE1154C63324329A34bdCBd22c");
+  const nusic:Nusic = await Nusic.attach("0x92C2F0Eb4dc5f8E69C3AaB64c6B7c2030A64082D");
   await nusic.deployed();
   console.log("Nusic Address:", nusic.address);
 
