@@ -156,7 +156,7 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     expect(await (nusic.connect(owner).preSeedMinted())).to.be.equal(await nusic.MAX_PRE_SEED_SUPPLY());
   });
 
-  it("Pre-seed minting should as all pre-seen token already minted", async function () {
+  it("Pre-seed minting should fail as all pre-seed token already minted", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).preSeedMint(5, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
   });
