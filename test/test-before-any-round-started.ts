@@ -96,7 +96,7 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     await expect((nusic.connect(addr1).preSeedMint(3, addr1.address))).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it("Pre-seed minting should fail when Non-owner call it", async function () {
+  it("Pre-seed minting should fail when try to mint more then per transaction limit", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).preSeedMint(6, addr1.address))).to.be.revertedWith("Exceed Per Txt limit");
   });
@@ -184,6 +184,16 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
   it("setTreasuryAddress should fail if address provided is null", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).setTreasuryAddress("0x0000000000000000000000000000000000000000"))).to.be.revertedWith("NULL Address Provided");
+  });
+
+  it("setTreasuryAddress should update address properly", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).setTreasuryAddress(addr1.address))).to.be.ok;
+  });
+
+  it("treasuryAddress matches the address provided", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).tresuryAddress())).to.be.equal(addr1.address);
   });
 
 });
