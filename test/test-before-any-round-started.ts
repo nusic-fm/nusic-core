@@ -139,8 +139,6 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
   });
   */
 
-
-
   it("Pre-seed minting should work even no round is active", async function () {
     const [owner,addr1] = await ethers.getSigners();
     expect(await (nusic.connect(owner).preSeedMint(5, addr1.address))).to.be.ok;
@@ -168,6 +166,16 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     expect(await (nusic.connect(owner).tokenURI(3))).to.be.equal("ipfs://QmXsMLpKjznF3z1KsVm5tNs3E94vj4BFAyAHvD5RTWgQ1J");
   });
 
+  it("setBaseURI should update URI properly", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).setBaseURI("https://gateway.pinata.cloud/ipfs/Qmd8grfncQt8oynkXTqyRohYDppsjpdagfY4MDQBr3aEdk/"))).to.be.ok;
+  });
+
+  it("Get tokenURI should return proper URI with JSON", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).tokenURI(3))).to.be.equal("https://gateway.pinata.cloud/ipfs/Qmd8grfncQt8oynkXTqyRohYDppsjpdagfY4MDQBr3aEdk/3.json");
+  });
+
   it("setTreasuryAddress should fail when non-owner calls it", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(addr1).setTreasuryAddress(addr1.address))).to.be.revertedWith("Ownable: caller is not the owner");
@@ -177,6 +185,5 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).setTreasuryAddress("0x0000000000000000000000000000000000000000"))).to.be.revertedWith("NULL Address Provided");
   });
-
 
 });
