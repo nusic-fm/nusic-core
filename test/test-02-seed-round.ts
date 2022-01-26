@@ -211,7 +211,7 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
     await expect((nusic.connect(_accountList[18]).stage1Mint(3, {value: amount}))).to.be.revertedWith("Minting would exceed supply for round");
   });
 
-  it("Activating Round Private when Seed round is incomplete should", async function () {
+  it("Activating Private Round when Seed round is incomplete should fail", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).activateRound(2))).to.be.revertedWith("Previous Round incomplete");
   });
@@ -254,5 +254,10 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
     expect((await nusic.connect(addr1).stage1Rounds(1)).isActive).to.be.false;
     expect((await nusic.connect(addr1).stage1Rounds(2)).isActive).to.be.true;
     expect((await nusic.connect(addr1).stage1Rounds(3)).isActive).to.be.false;
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(0);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(0);
   });
 });

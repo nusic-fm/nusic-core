@@ -196,6 +196,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     }
 
     function treasuryClaim(uint256 tokenQuantity) public onlyOwner{
+        require(currentRound > 0 && currentRound <= 3, "Invalid Round");
         require(tresuryAddress != address(0),"NULL Address Provided");
         require(stage1Rounds[currentRound].treasuryClaimed < stage1Rounds[currentRound].maxTreasuryShare, "All Claimed for current round");
         require(stage1Rounds[currentRound].treasuryClaimed + tokenQuantity <= stage1Rounds[currentRound].maxTreasuryShare, "Claim would exceed supply for round");
