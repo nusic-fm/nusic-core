@@ -9,6 +9,7 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
 
   let nusic:Nusic;
   let _accountList:Wallet[] = [];
+  let _accountListPrivateRound:Wallet[] = [];
   before(async()=>{
     const [owner,addr1] = await ethers.getSigners();
     const Nusic:Nusic__factory =  await ethers.getContractFactory("Nusic");
@@ -16,6 +17,7 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
     await nusic.deployed();
 
     // Generate Accounts for Testing
+    // Seed Round Minting Addresses
     const addressToBeGeneratedForSeed = ((await nusic.stage1Rounds(1)).maxSupplyForRound).div(await nusic.MINT_PER_TXT()).toNumber();
     console.log("Seed Accounts Generated = ",addressToBeGeneratedForSeed);
     
@@ -24,6 +26,23 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
       var privateKey = "0x"+id;
       var wallet = new ethers.Wallet(privateKey,ethers.provider);
       _accountList.push(wallet);
+      // Transfering funds to new account as they will not have balance
+      await addr1.sendTransaction({
+        to:wallet.address,
+        value: ethers.utils.parseEther("1")
+      })
+    }
+
+
+    // Private Round Minting Addresses
+    const addressToBeGeneratedForPrivate = ((await nusic.stage1Rounds(2)).maxSupplyForRound).div(await nusic.MINT_PER_TXT()).toNumber();
+    console.log("Private Accounts Generated = ",addressToBeGeneratedForPrivate);
+    
+    for(let i=0;i<addressToBeGeneratedForPrivate;i++) {
+      var id = crypto.randomBytes(32).toString('hex');
+      var privateKey = "0x"+id;
+      var wallet = new ethers.Wallet(privateKey,ethers.provider);
+      _accountListPrivateRound.push(wallet);
       // Transfering funds to new account as they will not have balance
       await addr1.sendTransaction({
         to:wallet.address,
@@ -192,6 +211,11 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
     await expect((nusic.connect(_accountList[18]).stage1Mint(3, {value: amount}))).to.be.revertedWith("Minting would exceed supply for round");
   });
 
+  it("Activating Round Private when Seed round is incomplete should", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    await expect((nusic.connect(owner).activateRound(2))).to.be.revertedWith("Previous Round incomplete");
+  });
+
   it("Seed round minting should final 2 token for public", async function () {
     const [owner,addr1, addr2] = await ethers.getSigners();
     const amount = (await nusic.connect(addr2).price()).mul(2);
@@ -218,9 +242,17 @@ describe("Nusic NFT Deployed: Seed Round Testing", function () {
     expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
   });
 
-  it("treasuryClaim should fail when all treasury token already minted", async function () {
+  it("treasuryClaim should fail when all treasury token for seed round already minted", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 
+  // Testcase related to Private Round (2nd round) starts here
+  it("Activating Private Round should work fine", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).activateRound(2))).to.be.ok;
+    expect((await nusic.connect(addr1).stage1Rounds(1)).isActive).to.be.false;
+    expect((await nusic.connect(addr1).stage1Rounds(2)).isActive).to.be.true;
+    expect((await nusic.connect(addr1).stage1Rounds(3)).isActive).to.be.false;
+  });
 });
