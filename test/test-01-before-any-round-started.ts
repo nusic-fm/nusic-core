@@ -193,7 +193,7 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
 
   it("treasuryAddress matches the address provided", async function () {
     const [owner,addr1] = await ethers.getSigners();
-    expect(await (nusic.connect(owner).tresuryAddress())).to.be.equal(addr1.address);
+    expect(await (nusic.connect(owner).treasuryAddress())).to.be.equal(addr1.address);
   });
 
 });
