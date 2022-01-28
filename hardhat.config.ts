@@ -13,6 +13,7 @@ import "./tasks/07_nft-token-read";
 import "./tasks/08_nft-token-set-uri";
 import 'hardhat-contract-sizer';
 import "@appliedblockchain/chainlink-plugins-fund-link";
+import "@nomiclabs/hardhat-etherscan";
 
 dotenv.config();
 
@@ -94,5 +95,10 @@ export default {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN_API_KEY
   }
 };

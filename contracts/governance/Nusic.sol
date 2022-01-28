@@ -15,7 +15,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     uint256 public constant MAX_PRE_SEED_SUPPLY = 25;
     uint256 public constant STAGE1_MAX_SUPPLY = 1000;
 
-    address public tresuryAddress = address(0);
+    address public treasuryAddress = address(0);
 
     uint256 public price = 0.04 ether;
 
@@ -197,25 +197,25 @@ contract Nusic is ERC721Enumerable, Ownable {
 
     function treasuryClaim(uint256 tokenQuantity) public onlyOwner{
         require(currentRound > 0 && currentRound <= 3, "Invalid Round");
-        require(tresuryAddress != address(0),"NULL Address Provided");
+        require(treasuryAddress != address(0),"NULL Address Provided");
         require(stage1Rounds[currentRound].treasuryClaimed < stage1Rounds[currentRound].maxTreasuryShare, "All Claimed for current round");
         require(stage1Rounds[currentRound].treasuryClaimed + tokenQuantity <= stage1Rounds[currentRound].maxTreasuryShare, "Claim would exceed supply for round");
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].treasuryClaimed++;
             totalMinted++;
-            _safeMint(tresuryAddress, totalMinted);
+            _safeMint(treasuryAddress, totalMinted);
         }
-        emit TreasuryClaimed(tresuryAddress, tokenQuantity,currentRound);
+        emit TreasuryClaimed(treasuryAddress, tokenQuantity,currentRound);
     }
 
     function setTreasuryAddress(address newTreasuryAddress) public onlyOwner {
         require(newTreasuryAddress != address(0),"NULL Address Provided");
-        tresuryAddress = newTreasuryAddress;
+        treasuryAddress = newTreasuryAddress;
     }
 
     function withdraw() public onlyOwner {
-        (bool sent, bytes memory data) = tresuryAddress.call{value: address(this).balance}("");
+        (bool sent, bytes memory data) = treasuryAddress.call{value: address(this).balance}("");
         require(sent, "Failed to withdraw Ether");
     }
 
