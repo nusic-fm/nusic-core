@@ -91,6 +91,7 @@ contract Nusic is ERC721Enumerable, Ownable {
 
     function activateRound(uint256 roundNumber) public onlyOwner {
         require(roundNumber > 0 && roundNumber <= 3, "Invalid Round");
+        require(roundNumber != currentRound, "Round Already active");
         require(totalSupply() >= stage1Rounds[roundNumber].totalSupplyBeforeCurrentRound, "Previous Round incomplete");
         if(roundNumber > 1) {
             stage1Rounds[roundNumber-1].isActive = false;

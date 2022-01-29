@@ -7,7 +7,7 @@ var crypto = require('crypto');
 
 // Addr1 is being used as treasury address
 
-describe("Nusic NFT Deployed: Seed Round Testing", function () {
+describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
 
   let nusic:Nusic;
   let _accountList:Wallet[] = [];
