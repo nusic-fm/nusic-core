@@ -128,7 +128,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 2: Public can mint by 
     expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
   });
 
-  // Public round test cases starts here (3rd Round)
+  // Public round test cases starts here (3rd Round) Case 2
 
   it("Public Round Case2: Activating Public Round should work fine", async function () {
     const [owner,addr1] = await ethers.getSigners();
@@ -275,7 +275,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 2: Public can mint by 
   });
 
   // Addr1 is being used as treasury address
-  it("Public Round Case2: Withdrow with owner account should file and update balance of Treasury Address", async function () {
+  it("Public Round Case2: Withdraw with owner account should file and update balance of Treasury Address", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const price = await nusic.connect(addr3).price();
     // Total public tokens 500, out of which:

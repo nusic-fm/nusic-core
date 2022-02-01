@@ -6,12 +6,24 @@ import { Nusic, Nusic__factory } from '../typechain';
 var crypto = require('crypto');
 
 // Addr1 is being used as treasury address
-describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can transfer tokens", function () {
+describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by whitelist address by paying and Onwer can also transfer tokens", function () {
 
   let nusic:Nusic;
   let _accountList:Wallet[] = [];
   let _accountListPrivateRound:Wallet[] = [];
-  let _accountListPublicRound:Wallet[] = [];
+  let _accountListPublicRoundWhiteList:Wallet[] = [];
+  let _accountListPublicRoundPublicMinting:Wallet[] = [];
+  // Sequence of Transfer will be
+  // 1. publicAuctionTransfer 5 -- Total 5
+  // 2. TreasuryCliam 50  -- Total 55
+  // 3. stage1Mint by whitelisted 5 -- Total 60
+  // 4. stage1Mint by whitelisted 3 -- Total 63
+  // 5. stage1Mint by whitelisted 2 -- Total 65
+  // 6. publicAuctionTransfer 30 -- Total 95
+  // 7. stage1Mint by whitelisted 65 -- Total 160
+  // 8. stage1Mint by Non Whitelisted 100 -- Total 260
+  // 9. TreasuryCliam 200  -- Total 460
+  // 10. publicAuctionTransfer 40 -- Total 500
   before(async()=>{
     const [owner,addr1] = await ethers.getSigners();
     const Nusic:Nusic__factory =  await ethers.getContractFactory("Nusic");
@@ -55,12 +67,19 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     // Private Round Minting Addresses
     const addressToBeGeneratedForPublic = ((await nusic.stage1Rounds(3)).maxSupplyForRound).div(await nusic.MINT_PER_TXT()).toNumber();
     console.log("Public Round Accounts Generated = ",addressToBeGeneratedForPublic);
-    
+    const toBeUsedInWhitelist = 15;
+    // Keeping 15 accounts addresses to be used as whitelist
+    // Remaing 35 accounts addresses for public minting 
     for(let i=0;i<addressToBeGeneratedForPublic;i++) {
       var id = crypto.randomBytes(32).toString('hex');
       var privateKey = "0x"+id;
       var wallet = new ethers.Wallet(privateKey,ethers.provider);
-      _accountListPublicRound.push(wallet);
+      if(i<toBeUsedInWhitelist) {
+        _accountListPublicRoundWhiteList.push(wallet);
+      }
+      else {
+        _accountListPublicRoundPublicMinting.push(wallet);
+      }
       // Transfering funds to new account as they will not have balance
       await addr1.sendTransaction({
         to:wallet.address,
@@ -128,14 +147,8 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
   });
 
-  // Public round test cases starts here (3rd Round) Case 1
-
-  it("Public Round Case1: publicAuctionTransfer should fail because public round is not active", async function () {
-    const [owner,addr1] = await ethers.getSigners();
-    await expect((nusic.connect(owner).publicAuctionTransfer(3, addr1.address))).to.be.revertedWith("Not public round");
-  });
-
-  it("Public Round Case1: Activating Public Round should work fine", async function () {
+  // Public round test cases starts here (3rd Round) Case 3
+  it("Public Round Case3: Activating Public Round should work fine", async function () {
     const [owner,addr1] = await ethers.getSigners();
     expect(await (nusic.connect(owner).activateRound(3))).to.be.ok;
     expect((await nusic.connect(addr1).stage1Rounds(1)).isActive).to.be.false;
@@ -143,20 +156,60 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     expect((await nusic.connect(addr1).stage1Rounds(3)).isActive).to.be.true;
   });
 
-  it("Public Round Case1: Minting by public using 'stage1Mint' should fail when publicMintingAllowed is false", async function () {
+  it("Public Round Case3: Minting by public using 'stage1Mint' should fail when publicMintingAllowed is false", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
   });
 
-  it("Public Round Case1: publicAuctionTransfer should fail when called with Non-Owner account", async function () {
-    const [owner,addr1,addr2] = await ethers.getSigners();
-    await expect((nusic.connect(addr1).publicAuctionTransfer(3, addr2.address))).to.be.revertedWith("Ownable: caller is not the owner");
+  it("Public Round Case3: togglePublicMinting owner account should toggle to true successfully", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).publicMintingAllowed())).to.be.false;
+    expect(await (nusic.connect(owner).togglePublicMinting())).to.be.ok;
+    expect(await (nusic.connect(owner).publicMintingAllowed())).to.be.true;
   });
 
-  it("Public Round Case1: publicAuctionTransfer should be able mint 5 tokens for first address", async function () {
+  it("Public Round Case3: toggleVerifyWhitelist call by non-owner account should fail", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    await expect((nusic.connect(addr1).toggleVerifyWhitelist())).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("Public Round Case3: toggleVerifyWhitelist owner account should toggle to true successfully", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).verifyWhitelist())).to.be.false;
+    expect(await (nusic.connect(owner).toggleVerifyWhitelist())).to.be.ok;
+    expect(await (nusic.connect(owner).verifyWhitelist())).to.be.true;
+  });
+  
+  it("Public Round Case3: Minting by public using 'stage1Mint' should fail when publicMintingAllowed for only whitelisted", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr3).price()).mul(1);
+    await expect((nusic.connect(_accountListPublicRoundWhiteList[0]).stage1Mint(1, {value: amount}))).to.be.revertedWith("Not Qualified");
+  });
+
+  it("Public Round Case3: Adding to whilelist should fail when called by non-owner account", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    await expect((nusic.connect(addr1).addToWhitelist([_accountListPublicRoundWhiteList[0].address]))).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("Public Round Case3: Removing from whilelist should fail when called by non-owner account", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    await expect((nusic.connect(addr1).removeFromWhitelist([_accountListPublicRoundWhiteList[0].address]))).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("Public Round Case3: Adding to whilelist should fail when null address provided", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    await expect((nusic.connect(owner).addToWhitelist(["0x0000000000000000000000000000000000000000"]))).to.be.revertedWith("NULL Address Provided");
+  });
+
+  it("Public Round Case3: Removing from whilelist should fail when null address provided", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    await expect((nusic.connect(owner).removeFromWhitelist(["0x0000000000000000000000000000000000000000"]))).to.be.revertedWith("NULL Address Provided");
+  });
+
+  it("Public Round Case3: publicAuctionTransfer should be able mint 5 tokens for first address", async function () {
     const [owner,addr1, addr2] = await ethers.getSigners();
-    expect(await (nusic.connect(owner).publicAuctionTransfer(5,_accountListPublicRound[0].address))).to.be.ok;
+    expect(await (nusic.connect(owner).publicAuctionTransfer(5,_accountListPublicRoundPublicMinting[0].address))).to.be.ok;
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(505);
     expect(await (nusic.connect(owner).totalMinted())).to.be.equal(505);
 
@@ -169,12 +222,12 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(0);
   });
 
-  it("Public Round Case1: treasuryClaim should mint 150 token for treasury", async function () {
+  it("Public Round Case3: treasuryClaim should mint 50 token for treasury", async function () {
     const [owner,addr1] = await ethers.getSigners();
-    expect(await (nusic.connect(owner).treasuryClaim(150))).to.be.ok;
+    expect(await (nusic.connect(owner).treasuryClaim(50))).to.be.ok;
 
-    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(655);
-    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(655);
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(555);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(555);
 
     expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
     expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
@@ -182,81 +235,75 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
   
     expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(5);
-    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(150);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
   });
 
-  it("Public Round Case1: publicAuctionTransfer should be able mint all remaining tokens", async function () {
-    const [owner,addr1, addr2] = await ethers.getSigners();
+  it("Public Round Case3: Adding to whilelist should add addresses successfully", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
 
-    for(let i=1; i<_accountListPublicRound.length;i++){
-      expect(await (nusic.connect(owner).publicAuctionTransfer(5, _accountListPublicRound[i].address))).to.be.ok;
+    const accountList:string[] = [
+                                  _accountListPublicRoundWhiteList[0].address,
+                                  _accountListPublicRoundWhiteList[1].address,
+                                  _accountListPublicRoundWhiteList[2].address,
+                                  _accountListPublicRoundWhiteList[3].address,
+                                  _accountListPublicRoundWhiteList[4].address,
+                                ];
+    // Adding multiple addresses in whitelist in single call
+    expect(await (nusic.connect(owner).addToWhitelist(accountList))).to.be.ok;
+    // Address addresses into whitelist one by one
+    for(let i=5; i<_accountListPublicRoundWhiteList.length;i++){
+      expect(await (nusic.connect(owner).addToWhitelist([_accountListPublicRoundWhiteList[i].address]))).to.be.ok;
     }
 
-    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(900);
-    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(900);
+    expect(await (nusic.connect(owner).publicSaleWhitelist(_accountListPublicRoundWhiteList[0].address))).to.be.equal(true);
+    expect(await (nusic.connect(owner).publicSaleWhitelist(addr2.address))).to.be.equal(false);
+    expect(await (nusic.connect(owner).publicSaleWhitelist(_accountListPublicRoundWhiteList[13].address))).to.be.equal(true);
+  });
+
+  it("Public Round Case3: Minting by whitelisted address using 'stage1Mint' should mint tokens", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr3).price()).mul(5);
+    expect(await (nusic.connect(_accountListPublicRoundWhiteList[0]).stage1Mint(5, {value: amount}))).to.be.ok;
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(560);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(560);
 
     expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
     expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
     expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
     expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
   
-    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(250);
-    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(150);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(10);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
   });
 
-  it("Public Round Case1: publicAuctionTransfer should fail when all tokens already minted", async function () {
-    const [owner,addr1,addr2] = await ethers.getSigners();
-    await expect((nusic.connect(owner).publicAuctionTransfer(3, addr2.address))).to.be.revertedWith("All minted for current round");
-  });
+  it("Public Round Case3: Minting by 2nd whitelisted address using 'stage1Mint' should mint tokens", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr3).price()).mul(3);
+    expect(await (nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(3, {value: amount}))).to.be.ok;
 
-  it("Public Round Case1: treasuryClaim should mint remaing 100 token for treasury", async function () {
-    const [owner,addr1] = await ethers.getSigners();
-    expect(await (nusic.connect(owner).treasuryClaim(100))).to.be.ok;
-
-    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(1000);
-    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(1000);
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(563);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(563);
 
     expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
     expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
     expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
     expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
   
-    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(250);
-    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(250);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(13);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
   });
 
-  it("Public Round Case1: Minting of Pre-Seed, Public mint and Treasury Claim should fail when all Public Round tokens already minted", async function () {
+  it("Public Round Case3: Removing from whilelist should remove provided address", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
-    const amount = (await nusic.connect(addr3).price()).mul(1);
-    await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
-    await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
+    await expect((nusic.connect(owner).removeFromWhitelist([_accountListPublicRoundWhiteList[1].address]))).to.be.ok;
+    expect(await (nusic.connect(owner).publicSaleWhitelist(_accountListPublicRoundWhiteList[1].address))).to.be.equal(false);
   });
 
-  it("Public Round Case1: Withdraw should fail when call with Non-owner account", async function () {
+  it("Public Round Case3: Minting by 2nd address using 'stage1Mint' should fail after removal from whiltelist", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
-    await expect((nusic.connect(addr3).withdraw())).to.be.revertedWith("Ownable: caller is not the owner");
+    const amount = (await nusic.connect(addr3).price()).mul(2);
+    await expect((nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(2, {value: amount}))).to.be.revertedWith("Not Qualified");
   });
-
-  // Addr1 is being used as treasury address
-  it("Public Round Case1: Withdraw with owner account should file and update balance of Treasury Address", async function () {
-    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
-    const price = await nusic.connect(addr3).price();
-    // Total public tokens 500, out of which:
-    // 25 directly transferred to advisors
-    // 225 minted by public
-    // 250 transferred by owner to public, so no payment received
-    // Funds collected for on 225 public minted
-    const totalMinted = 225;
-    const balanceBeforeWithdraw = await addr1.getBalance();
-    //console.log("Balance before = ",balanceBeforeWithdraw.toString());
-    //console.log("Balance before = ",await ethers.utils.formatEther(balanceBeforeWithdraw));
-    expect(await (nusic.connect(owner).withdraw())).to.be.ok;
-
-    const balanceAfterWithdraw = await addr1.getBalance();
-    //console.log("Balance After = ",balanceAfterWithdraw.toString());
-    //console.log("Balance After = ",await ethers.utils.formatEther(balanceAfterWithdraw));
-    const balanceShouldBe = balanceBeforeWithdraw.add(price.mul(totalMinted));
-    expect(balanceAfterWithdraw).to.be.equal(balanceShouldBe);
-  });
+  
 });
