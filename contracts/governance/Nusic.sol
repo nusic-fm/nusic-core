@@ -216,6 +216,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     }
 
     function withdraw() public onlyOwner {
+        require(treasuryAddress != address(0),"NULL Address Provided");
         (bool sent, bytes memory data) = treasuryAddress.call{value: address(this).balance}("");
         require(sent, "Failed to withdraw Ether");
     }

@@ -84,6 +84,11 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(5);
   });
 
+  it("Withdraw should when TreasuryAddress is not set", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    await expect((nusic.connect(owner).withdraw())).to.be.revertedWith("NULL Address Provided");
+  });
+
   it("setTreasuryAddress should update address properly", async function () {
     const [owner,addr1] = await ethers.getSigners();
     expect(await (nusic.connect(owner).setTreasuryAddress(addr1.address))).to.be.ok;
