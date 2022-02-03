@@ -369,4 +369,109 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
   });
 
+  it("Public Round Case3: toggleVerifyWhitelist owner account should toggle to False successfully", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).verifyWhitelist())).to.be.true;
+    expect(await (nusic.connect(owner).toggleVerifyWhitelist())).to.be.ok;
+    expect(await (nusic.connect(owner).verifyWhitelist())).to.be.false;
+  });
+
+
+  it("Public Round Case3: Minting by Non Whitelisted using 'stage1Mint' should mint 100 tokens for 20 addresses", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+
+    // We have 35 address for public minting and owner transfer, each will mint 5 tokens 
+    // Index 0 and 6 already have 5 token each -- tranfered by owner as aution
+    // We will start from index 7 to 26 (20 address) so 5x15=75
+    const amount = (await nusic.connect(addr2).price()).mul(5);
+
+    for(let i=7; i<=26 ;i++){
+      expect(await (nusic.connect(_accountListPublicRoundPublicMinting[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+    }
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(760);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(760);
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
+  
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(210);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
+  });
+
+  it("Public Round Case3: treasuryClaim should mint remaing 200 token for treasury", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).treasuryClaim(200))).to.be.ok;
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(960);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(960);
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
+  
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(210);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(250);
+  });
+
+  it("Public Round Case3: publicAuctionTransfer should be able mint 40 tokens", async function () {
+    const [owner,addr1, addr2] = await ethers.getSigners();
+
+    //_accountListPublicRoundPublicMinting[0] already have 5 tokens
+    // For 30 tokens we need 6 more address each will have 5 tokens from index 1 to 6
+
+    // Index 0 and 26 already have 5 token each
+    // We will start from index 27 to 34 (8 address) so 5x8=40
+    for(let i=27; i<= 34 ;i++){
+      expect(await (nusic.connect(owner).publicAuctionTransfer(5, _accountListPublicRoundPublicMinting[i].address))).to.be.ok;
+    }
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(1000);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(1000);
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
+  
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(250);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(250);
+  });
+
+  it("Public Round Case3: Minting of Pre-Seed, Public mint, publicAuctionTransfer and Treasury Claim should fail when all Public Round tokens already minted", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr3).price()).mul(1);
+    await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
+    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(owner).publicAuctionTransfer(1, addr3.address))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
+  });
+
+  // Addr1 is being used as treasury address
+  it("Public Round Case3: Withdraw with owner account should file and update balance of Treasury Address", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    const price = await nusic.connect(addr3).price();
+    // Total public tokens 500, out of which:
+    // 25 directly transferred to advisors
+    // 225 minted by public in seed and private round
+    // 75 transferred by owner to public, so no payment received
+    // 75 minted by whitelisted address, payment received
+    // 100 minted by non whitelisted, payment received
+    // Funds collected for on 225 + 175 = 400
+    const totalMinted = 400;
+    const balanceBeforeWithdraw = await addr1.getBalance();
+    //console.log("Balance before = ",balanceBeforeWithdraw.toString());
+    //console.log("Balance before = ",await ethers.utils.formatEther(balanceBeforeWithdraw));
+    expect(await (nusic.connect(owner).withdraw())).to.be.ok;
+
+    const balanceAfterWithdraw = await addr1.getBalance();
+    //console.log("Balance After = ",balanceAfterWithdraw.toString());
+    //console.log("Balance After = ",await ethers.utils.formatEther(balanceAfterWithdraw));
+    const balanceShouldBe = balanceBeforeWithdraw.add(price.mul(totalMinted));
+    expect(balanceAfterWithdraw).to.be.equal(balanceShouldBe);
+  });
+  
 });
