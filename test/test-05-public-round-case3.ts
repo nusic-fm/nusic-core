@@ -305,5 +305,68 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const amount = (await nusic.connect(addr3).price()).mul(2);
     await expect((nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(2, {value: amount}))).to.be.revertedWith("Not Qualified");
   });
+
+  it("Public Round Case3: Minting by 2nd address using 'stage1Mint' should works fine after adding back to whitelist", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr3).price()).mul(2);
+    expect(await (nusic.connect(owner).addToWhitelist([_accountListPublicRoundWhiteList[1].address]))).to.be.ok;
+    expect(await (nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(2, {value: amount}))).to.be.ok;
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(565);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(565);
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
   
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(15);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
+  });
+
+  it("Public Round Case3: publicAuctionTransfer should be able mint 30 tokens", async function () {
+    const [owner,addr1, addr2] = await ethers.getSigners();
+
+    //_accountListPublicRoundPublicMinting[0] already have 5 tokens
+    // For 30 tokens we need 6 more address each will have 5 tokens from index 1 to 6
+    for(let i=1; i<= 6 ;i++){
+      expect(await (nusic.connect(owner).publicAuctionTransfer(5, _accountListPublicRoundPublicMinting[i].address))).to.be.ok;
+    }
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(595);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(595);
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
+  
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(45);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
+  });
+
+  it("Public Round Case3: Minting by whitelisted using 'stage1Mint' should mint for all remaining whitelisted addresses", async function () {
+    const [owner,addr1,addr2,addr3] = await ethers.getSigners();
+
+    // We have 15 address for whitelisted minting, each will mint 5 tokens 
+    // Index 0 and 1 have 5 token each
+    // We will start from index 2 to 14 (13 address) so 5x13=65
+    const amount = (await nusic.connect(addr2).price()).mul(5);
+
+    for(let i=2; i<= 14 ;i++){
+      expect(await (nusic.connect(_accountListPublicRoundWhiteList[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+    }
+
+    expect(await (nusic.connect(owner).totalSupply())).to.be.equal(660);
+    expect(await (nusic.connect(owner).totalMinted())).to.be.equal(660);
+
+    expect((await (nusic.connect(owner).stage1Rounds(1))).minted).to.be.equal(100);
+    expect((await (nusic.connect(owner).stage1Rounds(1))).treasuryClaimed).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).minted).to.be.equal(125);
+    expect((await (nusic.connect(owner).stage1Rounds(2))).treasuryClaimed).to.be.equal(125);
+  
+    expect((await (nusic.connect(owner).stage1Rounds(3))).minted).to.be.equal(110);
+    expect((await (nusic.connect(owner).stage1Rounds(3))).treasuryClaimed).to.be.equal(50);
+  });
+
 });
