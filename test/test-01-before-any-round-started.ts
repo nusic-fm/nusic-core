@@ -85,6 +85,26 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     await expect((nusic.connect(addr1).activateCurrentRound())).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
+  it("Minting should be failed when Non approved address try to mint", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr1).price()).mul(1);
+    await expect((nusic.connect(addr1).stage1Mint(1, {value: amount}))).to.be.revertedWith("Address Not Approved");
+  });
+
+  it("Adding to approve list should fail when called by non-owner account", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr2).price()).mul(1);
+    await expect((nusic.connect(addr2).addToApproveList([addr1.address]))).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("Adding to approve list should works fine", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr1).price()).mul(1);
+    expect(await (nusic.connect(owner).addToApproveList([addr1.address]))).to.be.ok;
+    expect(await nusic.connect(addr2).approvedList(addr1.address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(addr2.address)).to.be.false;
+  });
+
   it("Minting should be failed when No investment round is active", async function () {
     const [owner,addr1] = await ethers.getSigners();
     const amount = (await nusic.connect(addr1).price()).mul(1);
@@ -130,14 +150,6 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(owner).tokenURI(3))).to.be.revertedWith("Token does not exists");
   });
-
-  /*
-  // it will be used and round 1,2 or 3 is active
-  it("treasuryClaim should if valid tresury address not set", async function () {
-    const [owner,addr1] = await ethers.getSigners();
-    await expect((nusic.connect(owner).treasuryClaim(3))).to.be.revertedWith("NULL Address Provided");
-  });
-  */
 
   it("Pre-seed minting should work even no round is active", async function () {
     const [owner,addr1] = await ethers.getSigners();
