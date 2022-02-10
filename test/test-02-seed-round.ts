@@ -95,10 +95,41 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     expect(await (nusic.connect(owner).treasuryAddress())).to.be.equal(addr1.address);
   });
 
+  it("Minting should be failed when Non approved address try to mint", async function () {
+    const [owner,addr1] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr1).price()).mul(1);
+    await expect((nusic.connect(addr1).stage1Mint(1, {value: amount}))).to.be.revertedWith("Address Not Approved");
+  });
+
+  it("Adding to approve list should fail when called by non-owner account", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    const amount = (await nusic.connect(addr2).price()).mul(1);
+    await expect((nusic.connect(addr2).addToApproveList([_accountList[0].address]))).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("Adding first address to approve list should works fine", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    expect(await (nusic.connect(owner).addToApproveList([_accountList[0].address]))).to.be.ok;
+    expect(await nusic.connect(addr2).approvedList(_accountList[0].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(addr2.address)).to.be.false;
+  });
+
   it("Seed round minting should fail when round is not active", async function () {
     const [owner,addr1, addr2] = await ethers.getSigners();
     const amount = (await nusic.connect(addr2).price()).mul(5);
     await expect((nusic.connect(_accountList[0]).stage1Mint(5, {value: amount}))).to.be.revertedWith("Funding Round not active");
+  });
+
+  it("Adding address for seed round to approve list should works fine", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    const listForApprovalAddresses = [];
+    for(let i=1; i<_accountList.length;i++){
+      listForApprovalAddresses.push(_accountList[i].address);
+    }
+    expect(await (nusic.connect(owner).addToApproveList(listForApprovalAddresses))).to.be.ok;
+    expect(await nusic.connect(addr2).approvedList(_accountList[9].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(_accountList[17].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(addr2.address)).to.be.false;
   });
 
   it("Activating Seed Round by Non-Owner user should fail", async function () {
@@ -258,7 +289,7 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(_accountList[_accountList.length-1]).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 
@@ -269,7 +300,7 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
   });
 
   // Addr1 is being used as treasury address
-  it("Withdrow with owner account should file and update balance of Treasury Address", async function () {
+  it("Withdraw with owner account should file and update balance of Treasury Address", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const price = await nusic.connect(addr3).price();
     const seedRoundMinted = (await nusic.connect(addr3).stage1Rounds(1)).minted;
@@ -304,20 +335,32 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     await expect((nusic.connect(addr1).setPrice(await ethers.utils.parseEther("0.06")))).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it("Private Round: SetPrice should be updated successfully with owner account ", async function () {
+  it("Private Round: SetPrice should be updated successfully with owner account", async function () {
     const [owner,addr1] = await ethers.getSigners();
     expect(await (nusic.connect(owner).setPrice(await ethers.utils.parseEther("0.06")))).to.be.ok;
     expect(await (nusic.connect(addr1).price())).to.be.equal(await ethers.utils.parseEther("0.06"));
+  });
+
+  it("Adding address for private round to approve list should works fine", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    const listForApprovalAddresses = [];
+    for(let i=0; i<_accountListPrivateRound.length;i++){
+      listForApprovalAddresses.push(_accountListPrivateRound[i].address);
+    }
+    expect(await (nusic.connect(owner).addToApproveList(listForApprovalAddresses))).to.be.ok;
+    expect(await nusic.connect(addr2).approvedList(_accountListPrivateRound[14].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(_accountListPrivateRound[23].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(addr2.address)).to.be.false;
   });
 
   it("Private Round: Minting should fail if round is deactivated", async function () {
     const [owner,addr1, addr2, addr3,addr4] = await ethers.getSigners();
     const amount = (await nusic.connect(addr4).price()).mul(5);
     expect(await (nusic.connect(owner).deactivateCurrentRound())).to.be.ok;
-    await expect((nusic.connect(addr4).stage1Mint(5, {value: amount}))).to.be.revertedWith("Funding Round not active");
+    await expect((nusic.connect(_accountListPrivateRound[0]).stage1Mint(5, {value: amount}))).to.be.revertedWith("Funding Round not active");
     expect(await (nusic.connect(owner).activateCurrentRound())).to.be.ok;
   });
-
+  
   it("Private Round: Minting should mint 5 tokens for first address", async function () {
     const [owner,addr1, addr2] = await ethers.getSigners();
     const amount = (await nusic.connect(addr2).price()).mul(5);
@@ -407,7 +450,7 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(_accountListPrivateRound[0]).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 
