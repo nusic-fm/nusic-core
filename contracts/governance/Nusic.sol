@@ -29,6 +29,8 @@ contract Nusic is ERC721Enumerable, Ownable {
     bool public publicMintingAllowed = false;
     bool public verifyWhitelist = false;
     mapping(address => bool) public publicSaleWhitelist;
+
+    mapping(address => bool) public approvedList;
     
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
@@ -145,6 +147,20 @@ contract Nusic is ERC721Enumerable, Ownable {
         }
     }
 
+    function addToApproveList(address[] memory approveAddressList) public onlyOwner {
+        for (uint256 i = 0; i < approveAddressList.length; i++) {
+            require(approveAddressList[i] != address(0),"NULL Address Provided");
+            approvedList[approveAddressList[i]] = true;
+        }
+    }
+
+    function removeFromApproveList(address[] memory addressList) public onlyOwner{
+        for (uint256 i = 0; i < addressList.length; i++) {
+            require(addressList[i] != address(0),"NULL Address Provided");
+            delete approvedList[addressList[i]];
+        }
+    }
+
     function togglePublicMinting() public onlyOwner{
         publicMintingAllowed = !publicMintingAllowed;
     }
@@ -154,6 +170,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     }
 
     function mintInternal(uint256 tokenQuantity, address to) private {
+        require(approvedList[to], "Address Not Approved");
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
         require(stage1Rounds[currentRound].minted < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
         require(stage1Rounds[currentRound].minted + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round");
@@ -217,7 +234,7 @@ contract Nusic is ERC721Enumerable, Ownable {
 
     function withdraw() public onlyOwner {
         require(treasuryAddress != address(0),"NULL Address Provided");
-        (bool sent, bytes memory data) = treasuryAddress.call{value: address(this).balance}("");
+        (bool sent, ) = treasuryAddress.call{value: address(this).balance}("");
         require(sent, "Failed to withdraw Ether");
     }
 
