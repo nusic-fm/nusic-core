@@ -67,6 +67,15 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
         value: ethers.utils.parseEther("1")
       })
     }
+
+    const listForApprovalAddresses = [];
+    for(let i=0; i<_accountList.length;i++){
+      listForApprovalAddresses.push(_accountList[i].address);
+    }
+    for(let i=0; i<_accountListPrivateRound.length;i++){
+      listForApprovalAddresses.push(_accountListPrivateRound[i].address);
+    }
+    await nusic.addToApproveList(listForApprovalAddresses);
   });
 
   it("setTreasuryAddress should update address properly", async function () {
@@ -154,6 +163,24 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     await expect((nusic.connect(addr1).publicAuctionTransfer(3, addr2.address))).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
+  it("Public Round Case1: publicAuctionTransfer should fail when address not approved", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    await expect((nusic.connect(owner).publicAuctionTransfer(3, addr2.address))).to.be.revertedWith("Address Not Approved");
+  });
+
+  it("Adding address for public round to approve list should works fine", async function () {
+    const [owner,addr1,addr2] = await ethers.getSigners();
+    const listForApprovalAddresses = [];
+    for(let i=0; i<_accountListPublicRound.length;i++){
+      listForApprovalAddresses.push(_accountListPublicRound[i].address);
+    }
+    expect(await (nusic.connect(owner).addToApproveList(listForApprovalAddresses))).to.be.ok;
+    expect(await nusic.connect(addr2).approvedList(_accountListPublicRound[29].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(_accountListPublicRound[39].address)).to.be.true;
+    expect(await nusic.connect(addr2).approvedList(addr2.address)).to.be.false;
+  });
+
+  ///////////////>>>>>>>>>>>>.
   it("Public Round Case1: publicAuctionTransfer should be able mint 5 tokens for first address", async function () {
     const [owner,addr1, addr2] = await ethers.getSigners();
     expect(await (nusic.connect(owner).publicAuctionTransfer(5,_accountListPublicRound[0].address))).to.be.ok;
@@ -206,7 +233,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
 
   it("Public Round Case1: publicAuctionTransfer should fail when all tokens already minted", async function () {
     const [owner,addr1,addr2] = await ethers.getSigners();
-    await expect((nusic.connect(owner).publicAuctionTransfer(3, addr2.address))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(owner).publicAuctionTransfer(3, _accountListPublicRound[0].address))).to.be.revertedWith("All minted for current round");
   });
 
   it("Public Round Case1: treasuryClaim should mint remaing 100 token for treasury", async function () {
