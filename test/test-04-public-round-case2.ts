@@ -67,6 +67,18 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 2: Public can mint by 
         value: ethers.utils.parseEther("1")
       })
     }
+
+    const listForApprovalAddresses = [];
+    for(let i=0; i<_accountList.length;i++){
+      listForApprovalAddresses.push(_accountList[i].address);
+    }
+    for(let i=0; i<_accountListPrivateRound.length;i++){
+      listForApprovalAddresses.push(_accountListPrivateRound[i].address);
+    }
+    for(let i=0; i<_accountListPublicRound.length;i++){
+      listForApprovalAddresses.push(_accountListPublicRound[i].address);
+    }
+    await nusic.addToApproveList(listForApprovalAddresses);
   });
 
   it("setTreasuryAddress should update address properly", async function () {
@@ -245,8 +257,8 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 2: Public can mint by 
     const [owner,addr1,addr2] = await ethers.getSigners();
     const amount = (await nusic.connect(addr2).price()).mul(3);
 
-    await expect((nusic.connect(owner).publicAuctionTransfer(3, addr2.address))).to.be.revertedWith("All minted for current round");
-    await expect((nusic.connect(addr2).stage1Mint(3, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(owner).publicAuctionTransfer(3, _accountListPublicRound[0].address))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(_accountListPublicRound[0]).stage1Mint(3, {value: amount}))).to.be.revertedWith("All minted for current round");
   });
 
   it("Public Round Case2: treasuryClaim should mint remaing 125 token for treasury", async function () {
@@ -269,8 +281,8 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 2: Public can mint by 
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
-    await expect((nusic.connect(owner).publicAuctionTransfer(1, addr3.address))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(_accountListPublicRound[0]).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(owner).publicAuctionTransfer(1, _accountListPublicRound[0].address))).to.be.revertedWith("All minted for current round");
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 
