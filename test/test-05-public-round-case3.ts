@@ -86,6 +86,21 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
         value: ethers.utils.parseEther("1")
       })
     }
+
+    const listForApprovalAddresses = [];
+    for(let i=0; i<_accountList.length;i++){
+      listForApprovalAddresses.push(_accountList[i].address);
+    }
+    for(let i=0; i<_accountListPrivateRound.length;i++){
+      listForApprovalAddresses.push(_accountListPrivateRound[i].address);
+    }
+    for(let i=0; i<_accountListPublicRoundWhiteList.length;i++){
+      listForApprovalAddresses.push(_accountListPublicRoundWhiteList[i].address);
+    }
+    for(let i=0; i<_accountListPublicRoundPublicMinting.length;i++){
+      listForApprovalAddresses.push(_accountListPublicRoundPublicMinting[i].address);
+    }
+    await nusic.addToApproveList(listForApprovalAddresses);
   });
 
   it("setTreasuryAddress should update address properly", async function () {
@@ -445,8 +460,8 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
-    await expect((nusic.connect(owner).publicAuctionTransfer(1, addr3.address))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(_accountListPublicRoundPublicMinting[0]).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(owner).publicAuctionTransfer(1, _accountListPublicRoundPublicMinting[0].address))).to.be.revertedWith("All minted for current round");
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 
