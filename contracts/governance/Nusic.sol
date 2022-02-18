@@ -16,6 +16,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     uint256 public constant STAGE1_MAX_SUPPLY = 1000;
 
     address public treasuryAddress = address(0);
+    address public managerAddress;
 
     uint256 public price = 0.04 ether;
 
@@ -67,6 +68,11 @@ contract Nusic is ERC721Enumerable, Ownable {
 		_;
 	}
 
+    modifier onlyOwnerORManager() {
+        require((owner() == _msgSender()) || (managerAddress == _msgSender()), "Caller needs to Owner or Manager");
+        _;
+    }
+
     function activateRound(uint256 roundNumber) public onlyOwner {
         require(roundNumber > 0 && roundNumber <= 3, "Invalid Round");
         require(roundNumber != currentRound, "Round Already active");
@@ -109,28 +115,28 @@ contract Nusic is ERC721Enumerable, Ownable {
         price = newPrice;
     }
 
-    function addToWhitelist(address[] memory addressList) public onlyOwner {
+    function addToWhitelist(address[] memory addressList) public onlyOwnerORManager {
         for (uint256 i = 0; i < addressList.length; i++) {
             require(addressList[i] != address(0),"NULL Address Provided");
             publicSaleWhitelist[addressList[i]] = true;
         }
     }
 
-    function removeFromWhitelist(address[] memory addressList) public onlyOwner{
+    function removeFromWhitelist(address[] memory addressList) public onlyOwnerORManager{
         for (uint256 i = 0; i < addressList.length; i++) {
             require(addressList[i] != address(0),"NULL Address Provided");
             delete publicSaleWhitelist[addressList[i]];
         }
     }
 
-    function addToApproveList(address[] memory approveAddressList) public onlyOwner {
+    function addToApproveList(address[] memory approveAddressList) public onlyOwnerORManager {
         for (uint256 i = 0; i < approveAddressList.length; i++) {
             require(approveAddressList[i] != address(0),"NULL Address Provided");
             approvedList[approveAddressList[i]] = true;
         }
     }
 
-    function removeFromApproveList(address[] memory addressList) public onlyOwner{
+    function removeFromApproveList(address[] memory addressList) public onlyOwnerORManager {
         for (uint256 i = 0; i < addressList.length; i++) {
             require(addressList[i] != address(0),"NULL Address Provided");
             delete approvedList[addressList[i]];
@@ -159,7 +165,7 @@ contract Nusic is ERC721Enumerable, Ownable {
         }
     }
 
-    function stage1Mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
+    function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         if(currentRound == 3) {
             require(publicMintingAllowed, "Minting not allowed");    
@@ -206,6 +212,11 @@ contract Nusic is ERC721Enumerable, Ownable {
     function setTreasuryAddress(address newTreasuryAddress) public onlyOwner {
         require(newTreasuryAddress != address(0),"NULL Address Provided");
         treasuryAddress = newTreasuryAddress;
+    }
+
+    function setManagerAddress(address newManagerAddress) public onlyOwner {
+        require(newManagerAddress != address(0),"NULL Address Provided");
+        managerAddress = newManagerAddress;
     }
 
     function withdraw() public onlyOwner {
