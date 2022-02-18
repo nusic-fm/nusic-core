@@ -106,7 +106,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     const amount = (await nusic.connect(addr2).price()).mul(mintCount);
 
     for(let i=0; i<_accountList.length;i++){
-      expect(await (nusic.connect(_accountList[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+      expect(await (nusic.connect(_accountList[i]).mint(5, {value: amount}))).to.be.ok;
     }
     expect(await (nusic.connect(owner).treasuryClaim(125))).to.be.ok;
 
@@ -125,7 +125,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     const amount = (await nusic.connect(addr2).price()).mul(mintCount);
 
     for(let i=0; i<_accountListPrivateRound.length;i++){
-      expect(await (nusic.connect(_accountListPrivateRound[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+      expect(await (nusic.connect(_accountListPrivateRound[i]).mint(5, {value: amount}))).to.be.ok;
     }
     expect(await (nusic.connect(owner).treasuryClaim(125))).to.be.ok;
     
@@ -152,10 +152,10 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     expect((await nusic.connect(addr1).stage1Rounds(3)).isActive).to.be.true;
   });
 
-  it("Public Round Case1: Minting by public using 'stage1Mint' should fail when publicMintingAllowed is false", async function () {
+  it("Public Round Case1: Minting by public using 'mint' should fail when publicMintingAllowed is false", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
+    await expect((nusic.connect(addr3).mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
   });
 
   it("Public Round Case1: publicAuctionTransfer should fail when called with Non-Owner account", async function () {
@@ -256,7 +256,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 1: Only Onwer can tran
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
+    await expect((nusic.connect(addr3).mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 

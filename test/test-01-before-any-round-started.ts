@@ -88,13 +88,13 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
   it("Minting should be failed when Non approved address try to mint", async function () {
     const [owner,addr1] = await ethers.getSigners();
     const amount = (await nusic.connect(addr1).price()).mul(1);
-    await expect((nusic.connect(addr1).stage1Mint(1, {value: amount}))).to.be.revertedWith("Address Not Approved");
+    await expect((nusic.connect(addr1).mint(1, {value: amount}))).to.be.revertedWith("Address Not Approved");
   });
 
   it("Adding to approve list should fail when called by non-owner account", async function () {
     const [owner,addr1,addr2] = await ethers.getSigners();
     const amount = (await nusic.connect(addr2).price()).mul(1);
-    await expect((nusic.connect(addr2).addToApproveList([addr1.address]))).to.be.revertedWith("Ownable: caller is not the owner");
+    await expect((nusic.connect(addr2).addToApproveList([addr1.address]))).to.be.revertedWith("Caller needs to Owner or Manager");
   });
 
   it("Adding to approve list should works fine", async function () {
@@ -108,7 +108,7 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
   it("Minting should be failed when No investment round is active", async function () {
     const [owner,addr1] = await ethers.getSigners();
     const amount = (await nusic.connect(addr1).price()).mul(1);
-    await expect((nusic.connect(addr1).stage1Mint(1, {value: amount}))).to.be.revertedWith("Funding Round not active");
+    await expect((nusic.connect(addr1).mint(1, {value: amount}))).to.be.revertedWith("Funding Round not active");
   });
 
   it("Pre-seed minting should fail when Non-owner call it", async function () {

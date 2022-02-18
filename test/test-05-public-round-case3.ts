@@ -131,7 +131,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const amount = (await nusic.connect(addr2).price()).mul(mintCount);
 
     for(let i=0; i<_accountList.length;i++){
-      expect(await (nusic.connect(_accountList[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+      expect(await (nusic.connect(_accountList[i]).mint(5, {value: amount}))).to.be.ok;
     }
     expect(await (nusic.connect(owner).treasuryClaim(125))).to.be.ok;
 
@@ -150,7 +150,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const amount = (await nusic.connect(addr2).price()).mul(mintCount);
 
     for(let i=0; i<_accountListPrivateRound.length;i++){
-      expect(await (nusic.connect(_accountListPrivateRound[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+      expect(await (nusic.connect(_accountListPrivateRound[i]).mint(5, {value: amount}))).to.be.ok;
     }
     expect(await (nusic.connect(owner).treasuryClaim(125))).to.be.ok;
     
@@ -174,7 +174,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
   it("Public Round Case3: Minting by public using 'stage1Mint' should fail when publicMintingAllowed is false", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
-    await expect((nusic.connect(addr3).stage1Mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
+    await expect((nusic.connect(addr3).mint(1, {value: amount}))).to.be.revertedWith("Minting not allowed");
   });
 
   it("Public Round Case3: togglePublicMinting owner account should toggle to true successfully", async function () {
@@ -199,17 +199,17 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
   it("Public Round Case3: Minting by public using 'stage1Mint' should fail when publicMintingAllowed for only whitelisted", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
-    await expect((nusic.connect(_accountListPublicRoundWhiteList[0]).stage1Mint(1, {value: amount}))).to.be.revertedWith("Not Qualified");
+    await expect((nusic.connect(_accountListPublicRoundWhiteList[0]).mint(1, {value: amount}))).to.be.revertedWith("Not Qualified");
   });
 
   it("Public Round Case3: Adding to whilelist should fail when called by non-owner account", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
-    await expect((nusic.connect(addr1).addToWhitelist([_accountListPublicRoundWhiteList[0].address]))).to.be.revertedWith("Ownable: caller is not the owner");
+    await expect((nusic.connect(addr1).addToWhitelist([_accountListPublicRoundWhiteList[0].address]))).to.be.revertedWith("Caller needs to Owner or Manager");
   });
 
   it("Public Round Case3: Removing from whilelist should fail when called by non-owner account", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
-    await expect((nusic.connect(addr1).removeFromWhitelist([_accountListPublicRoundWhiteList[0].address]))).to.be.revertedWith("Ownable: caller is not the owner");
+    await expect((nusic.connect(addr1).removeFromWhitelist([_accountListPublicRoundWhiteList[0].address]))).to.be.revertedWith("Caller needs to Owner or Manager");
   });
 
   it("Public Round Case3: Adding to whilelist should fail when null address provided", async function () {
@@ -278,7 +278,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
   it("Public Round Case3: Minting by whitelisted address using 'stage1Mint' should mint tokens", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(5);
-    expect(await (nusic.connect(_accountListPublicRoundWhiteList[0]).stage1Mint(5, {value: amount}))).to.be.ok;
+    expect(await (nusic.connect(_accountListPublicRoundWhiteList[0]).mint(5, {value: amount}))).to.be.ok;
 
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(560);
     expect(await (nusic.connect(owner).totalMinted())).to.be.equal(560);
@@ -295,7 +295,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
   it("Public Round Case3: Minting by 2nd whitelisted address using 'stage1Mint' should mint tokens", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(3);
-    expect(await (nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(3, {value: amount}))).to.be.ok;
+    expect(await (nusic.connect(_accountListPublicRoundWhiteList[1]).mint(3, {value: amount}))).to.be.ok;
 
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(563);
     expect(await (nusic.connect(owner).totalMinted())).to.be.equal(563);
@@ -318,14 +318,14 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
   it("Public Round Case3: Minting by 2nd address using 'stage1Mint' should fail after removal from whiltelist", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(2);
-    await expect((nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(2, {value: amount}))).to.be.revertedWith("Not Qualified");
+    await expect((nusic.connect(_accountListPublicRoundWhiteList[1]).mint(2, {value: amount}))).to.be.revertedWith("Not Qualified");
   });
 
   it("Public Round Case3: Minting by 2nd address using 'stage1Mint' should works fine after adding back to whitelist", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(2);
     expect(await (nusic.connect(owner).addToWhitelist([_accountListPublicRoundWhiteList[1].address]))).to.be.ok;
-    expect(await (nusic.connect(_accountListPublicRoundWhiteList[1]).stage1Mint(2, {value: amount}))).to.be.ok;
+    expect(await (nusic.connect(_accountListPublicRoundWhiteList[1]).mint(2, {value: amount}))).to.be.ok;
 
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(565);
     expect(await (nusic.connect(owner).totalMinted())).to.be.equal(565);
@@ -369,7 +369,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const amount = (await nusic.connect(addr2).price()).mul(5);
 
     for(let i=2; i<= 14 ;i++){
-      expect(await (nusic.connect(_accountListPublicRoundWhiteList[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+      expect(await (nusic.connect(_accountListPublicRoundWhiteList[i]).mint(5, {value: amount}))).to.be.ok;
     }
 
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(660);
@@ -401,7 +401,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const amount = (await nusic.connect(addr2).price()).mul(5);
 
     for(let i=7; i<=26 ;i++){
-      expect(await (nusic.connect(_accountListPublicRoundPublicMinting[i]).stage1Mint(5, {value: amount}))).to.be.ok;
+      expect(await (nusic.connect(_accountListPublicRoundPublicMinting[i]).mint(5, {value: amount}))).to.be.ok;
     }
 
     expect(await (nusic.connect(owner).totalSupply())).to.be.equal(760);
@@ -460,7 +460,7 @@ describe("Nusic NFT Deployed: Public Round Testing - Case 3: Public can mint by 
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
     await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    await expect((nusic.connect(_accountListPublicRoundPublicMinting[0]).stage1Mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
+    await expect((nusic.connect(_accountListPublicRoundPublicMinting[0]).mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
     await expect((nusic.connect(owner).publicAuctionTransfer(1, _accountListPublicRoundPublicMinting[0].address))).to.be.revertedWith("All minted for current round");
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
