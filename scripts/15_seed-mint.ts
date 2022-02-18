@@ -7,13 +7,15 @@ import { Nusic, Nusic__factory } from '../typechain';
 async function main() {
   const [owner, add1] = await ethers.getSigners();
   const Nusic:Nusic__factory = await ethers.getContractFactory("Nusic");
-  const nusic:Nusic = await Nusic.attach("0xc4B9A48176e352A62457C0f1BCd70b425D8451E8");
+  // Previous deployment address
+  // 0xc4B9A48176e352A62457C0f1BCd70b425D8451E8 
+  const nusic:Nusic = await Nusic.attach("0x2F5281f2A9Fa0a89aC250e61069E3B9213d56fE4");
   await nusic.deployed();
   console.log("Nusic Address:", nusic.address);
 
   const amount = (await nusic.connect(owner).price()).mul(2);
 
-  const txt1 = await nusic.stage1Mint(2, {value: amount});
+  const txt1 = await nusic.mint(2, {value: amount});
   console.log("Trasaction Hash = ",txt1.hash);
   const receipt = await txt1.wait();
   console.log("Receipt = ",receipt);
