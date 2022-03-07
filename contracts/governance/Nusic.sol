@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../ERC1404/ERC1404A.sol";
 
-contract Nusic is ERC721Enumerable, Ownable {
+contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;
@@ -32,7 +33,7 @@ contract Nusic is ERC721Enumerable, Ownable {
     mapping(address => bool) public publicSaleWhitelist;
 
     mapping(address => bool) public approvedList;
-    
+
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
     event TreasuryClaimed(address indexed to, uint256 tokenQuantity, uint256 round);
@@ -129,10 +130,10 @@ contract Nusic is ERC721Enumerable, Ownable {
         }
     }
 
-    function addToApproveList(address[] memory approveAddressList) public onlyOwnerORManager {
-        for (uint256 i = 0; i < approveAddressList.length; i++) {
-            require(approveAddressList[i] != address(0),"NULL Address Provided");
-            approvedList[approveAddressList[i]] = true;
+    function addToApproveList(address[] memory _approveAddressList) public onlyOwnerORManager {
+        for (uint256 i = 0; i < _approveAddressList.length; i++) {
+            require(_approveAddressList[i] != address(0),"NULL Address Provided");
+            approvedList[_approveAddressList[i]] = true;
         }
     }
 
@@ -140,6 +141,20 @@ contract Nusic is ERC721Enumerable, Ownable {
         for (uint256 i = 0; i < addressList.length; i++) {
             require(addressList[i] != address(0),"NULL Address Provided");
             delete approvedList[addressList[i]];
+        }
+    }
+
+    function addToRestrictedList(address[] memory _restrictedAddressList) public onlyOwner {
+        for (uint256 i = 0; i < _restrictedAddressList.length; i++) {
+            require(_restrictedAddressList[i] != address(0),"NULL Address Provided");
+            restrictedList[_restrictedAddressList[i]] = true;
+        }
+    }
+
+    function removeFromRestrictedList(address[] memory _restrictedAddressList) public onlyOwner {
+        for (uint256 i = 0; i < _restrictedAddressList.length; i++) {
+            require(_restrictedAddressList[i] != address(0),"NULL Address Provided");
+            delete restrictedList[_restrictedAddressList[i]];
         }
     }
 
@@ -223,5 +238,13 @@ contract Nusic is ERC721Enumerable, Ownable {
         require(treasuryAddress != address(0),"NULL Address Provided");
         (bool sent, ) = treasuryAddress.call{value: address(this).balance}("");
         require(sent, "Failed to withdraw Ether");
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override notRestricted(from, to, tokenId) {
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 }
