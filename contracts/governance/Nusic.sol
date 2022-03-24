@@ -29,8 +29,6 @@ contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
     uint256 public totalMinted = 25;
 
     bool public publicMintingAllowed = false;
-    bool public verifyWhitelist = false;
-    mapping(address => bool) public publicSaleWhitelist;
 
     mapping(address => bool) public approvedList;
 
@@ -116,20 +114,6 @@ contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
         price = newPrice;
     }
 
-    function addToWhitelist(address[] memory addressList) public onlyOwnerORManager {
-        for (uint256 i = 0; i < addressList.length; i++) {
-            require(addressList[i] != address(0),"NULL Address Provided");
-            publicSaleWhitelist[addressList[i]] = true;
-        }
-    }
-
-    function removeFromWhitelist(address[] memory addressList) public onlyOwnerORManager{
-        for (uint256 i = 0; i < addressList.length; i++) {
-            require(addressList[i] != address(0),"NULL Address Provided");
-            delete publicSaleWhitelist[addressList[i]];
-        }
-    }
-
     function addToApproveList(address[] memory _approveAddressList) public onlyOwnerORManager {
         for (uint256 i = 0; i < _approveAddressList.length; i++) {
             require(_approveAddressList[i] != address(0),"NULL Address Provided");
@@ -162,10 +146,6 @@ contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
         publicMintingAllowed = !publicMintingAllowed;
     }
 
-    function toggleVerifyWhitelist() public onlyOwner{
-        verifyWhitelist = !verifyWhitelist;
-    }
-
     function mintInternal(uint256 tokenQuantity, address to) private {
         require(approvedList[to], "Address Not Approved");
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
@@ -183,10 +163,7 @@ contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
     function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
         if(currentRound == 3) {
-            require(publicMintingAllowed, "Minting not allowed");    
-            if(verifyWhitelist) {
-                require(publicSaleWhitelist[msg.sender], "Not Qualified");
-            }
+            require(publicMintingAllowed, "Minting not allowed");
         }
         
         mintInternal(tokenQuantity, msg.sender);
