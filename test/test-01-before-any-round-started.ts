@@ -52,18 +52,16 @@ describe("Nusic NFT Deployed: Before any Investment round started", function () 
     expect((await nusic.connect(addr1).baseURI())).to.be.equal("");
   });
 
-  it("preSeedMinted should zero, totalMinted should be 25 publicMintingAllowed and verifyWhitelist should false", async function () {
+  it("preSeedMinted should zero, totalMinted should be 25 and publicMintingAllowed should false", async function () {
     const [owner,addr1] = await ethers.getSigners();
     expect((await nusic.connect(addr1).preSeedMinted())).to.be.equal(0);
     expect((await nusic.connect(addr1).totalMinted())).to.be.equal(25);
     expect((await nusic.connect(addr1).publicMintingAllowed())).to.be.equal(false);
-    expect((await nusic.connect(addr1).verifyWhitelist())).to.be.equal(false);
   });
 
-  it("togglePublicMinting and toggleVerifyWhitelist call by non-owner account should fail", async function () {
+  it("togglePublicMinting call by non-owner account should fail", async function () {
     const [owner,addr1] = await ethers.getSigners();
     await expect((nusic.connect(addr1).togglePublicMinting())).to.be.revertedWith("Ownable: caller is not the owner");
-    await expect((nusic.connect(addr1).toggleVerifyWhitelist())).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("All Funding Rounds should in inActive", async function () {
