@@ -5,9 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../ERC1404/ERC1404A.sol";
+import "../ERC1404/ERC1404N.sol";
 
-contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
+contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;
@@ -51,7 +51,8 @@ contract Nusic is ERC721Enumerable, ERC1404A, Ownable {
     uint256 currentRound;
 
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
-        defaultURI = _defaultURI;
+        defaultURI = "ipfs://QmXsMLpKjznF3z1KsVm5tNs3E94vj4BFAyAHvD5RTWgQ1J";
+        baseURI = _defaultURI;
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 250, 0, false);

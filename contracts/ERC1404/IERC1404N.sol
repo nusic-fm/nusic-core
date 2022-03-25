@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-interface IERC1404A {
+interface IERC1404N {
     /// @notice Detects if a transfer will be reverted and if so returns an appropriate reference code
     /// @param from Sending address
     /// @param to Receiving address

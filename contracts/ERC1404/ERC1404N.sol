@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
-import "./IERC1404A.sol";
+import "./IERC1404N.sol";
 
-contract ERC1404A is IERC1404A {
+contract ERC1404N is IERC1404N {
     
     uint8 public constant SUCCESS_CODE = 0;
     uint8 public constant TRANSFER_TO_RESTRICTION_CODE = 1;
