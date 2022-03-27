@@ -9,7 +9,7 @@ async function main() {
   const Nusic:Nusic__factory = await ethers.getContractFactory("Nusic");
   // Previous deployment address
   // 0xc4B9A48176e352A62457C0f1BCd70b425D8451E8 
-  const nusic:Nusic = await Nusic.attach("0x2F5281f2A9Fa0a89aC250e61069E3B9213d56fE4");
+  const nusic:Nusic = await Nusic.attach("0xB0DE5Af76595c05e88138550CA2A911D78075743");
   await nusic.deployed();
   console.log("Nusic Address:", nusic.address);
 
