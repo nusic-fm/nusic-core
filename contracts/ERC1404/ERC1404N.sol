@@ -6,7 +6,7 @@ contract ERC1404N is IERC1404N {
     
     uint8 public constant SUCCESS_CODE = 0;
     uint8 public constant TRANSFER_TO_RESTRICTION_CODE = 1;
-    uint8 public constant TRANSFER_FROM_RESTRICTION_CODE = 1;
+    uint8 public constant TRANSFER_FROM_RESTRICTION_CODE = 2;
     string public constant UNKNOWN_MESSAGE = "UNKNOWN";
     string public constant SUCCESS_MESSAGE = "SUCCESS";
     string public constant TRANSFER_TO_RESTRICTION_MESSAGE = "ILLEGAL_TRANSFER_TO_ADDRESS";

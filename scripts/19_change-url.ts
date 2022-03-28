@@ -7,28 +7,16 @@ import { Nusic, Nusic__factory } from '../typechain';
 async function main() {
   const [owner, add1] = await ethers.getSigners();
   const Nusic:Nusic__factory = await ethers.getContractFactory("Nusic");
-  // Previous deployment address
-  // 0xc4B9A48176e352A62457C0f1BCd70b425D8451E8 
+
   const nusic:Nusic = await Nusic.attach("0xB0DE5Af76595c05e88138550CA2A911D78075743");
   await nusic.deployed();
   console.log("Nusic Address:", nusic.address);
 
-  console.log("Balance = ", (await ethers.provider.getBalance(nusic.address)).toString());
-  console.log("Treasury = ", await nusic.treasuryAddress());
-  
-  // set treasury address
-  const txt1 = await nusic.withdraw();
+  const txt1 = await nusic.setBaseURI("https://gateway.pinata.cloud/ipfs/QmTNXy83bT6CtDugcuvmGy3gdXGcULdzCrzNToHiRTd47r/");
   console.log("Trasaction Hash = ",txt1.hash);
   const receipt = await txt1.wait();
-  console.log("Receipt = ",receipt);
+  console.log("Round activated Receipt = ",receipt);
 
-  /*
-  // set treasury address
-  const txt1 = await nusic.setTreasuryAddress(owner.address);
-  console.log("Trasaction Hash = ",txt1.hash);
-  const receipt = await txt1.wait();
-  console.log("Receipt = ",receipt);
-  */
 }
 
 // We recommend this pattern to be able to use async/await everywhere
