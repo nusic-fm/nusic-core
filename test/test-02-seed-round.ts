@@ -62,12 +62,11 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     expect((await nusic.connect(addr1).STAGE1_MAX_SUPPLY())).to.be.equal(1000);
   });
 
-  it("preSeedMinted should zero, totalMinted should be 25 publicMintingAllowed and verifyWhitelist should false", async function () {
+  it("preSeedMinted should zero, totalMinted should be 25 and publicMintingAllowed should false", async function () {
     const [owner,addr1] = await ethers.getSigners();
     expect((await nusic.connect(addr1).preSeedMinted())).to.be.equal(0);
     expect((await nusic.connect(addr1).totalMinted())).to.be.equal(25);
     expect((await nusic.connect(addr1).publicMintingAllowed())).to.be.equal(false);
-    expect((await nusic.connect(addr1).verifyWhitelist())).to.be.equal(false);
   });
 
   it("All Funding Rounds should in inActive", async function () {
@@ -454,6 +453,7 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
   });
 
+  // TODO: further implement restriction test cases
   it("Private Round: transfer", async function () {
     const [owner,addr1,addr2,addr3] = await ethers.getSigners();
     const amount = (await nusic.connect(addr3).price()).mul(1);
@@ -470,11 +470,11 @@ describe("Nusic NFT Deployed: Seed and Private Round Testing", function () {
     expect(await nusic.connect(owner).addToRestrictedList([addr3.address])).to.be.ok;
 
     console.log("nusic.balanceOf addr3 before = ", (await nusic.balanceOf(addr3.address)).toString());
-    expect(await nusic.connect(_accountList[0]).transferFrom(_accountList[0].address, addr3.address,26)).to.be.ok;
+    //expect(await nusic.connect(_accountList[0]).transferFrom(_accountList[0].address, addr3.address,26)).to.be.ok;
+    await expect(nusic.connect(_accountList[0]).transferFrom(_accountList[0].address, addr3.address,26)).to.be.revertedWith("ILLEGAL_TRANSFER_TO_ADDRESS");
+    
     console.log("nusic.balanceOf addr3 after = ", (await nusic.balanceOf(addr3.address)).toString());
-    //await expect((nusic.connect(owner).preSeedMint(1, addr1.address))).to.be.revertedWith("Minting will exceed PreSeed supply");
-    //await expect((nusic.connect(_accountListPrivateRound[0]).mint(1, {value: amount}))).to.be.revertedWith("All minted for current round");
-    //await expect((nusic.connect(owner).treasuryClaim(1))).to.be.revertedWith("All Claimed for current round");
+    
   });
 
 });

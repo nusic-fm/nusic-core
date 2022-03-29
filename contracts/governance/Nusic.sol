@@ -51,8 +51,7 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     uint256 currentRound;
 
     constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
-        defaultURI = "ipfs://QmXsMLpKjznF3z1KsVm5tNs3E94vj4BFAyAHvD5RTWgQ1J";
-        baseURI = _defaultURI;
+        defaultURI = _defaultURI;
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 250, 0, false);
