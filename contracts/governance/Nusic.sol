@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../ERC1404/ERC1404N.sol";
 
 contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
@@ -19,7 +20,8 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     address public treasuryAddress = address(0);
     address public managerAddress;
 
-    uint256 public price = 0.04 ether;
+    //uint256 public price = 0.04 ether;
+    uint256 public price = 2e18;
 
     // URI to be used before Reveal
     string public defaultURI;
@@ -50,11 +52,14 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     mapping(uint256 => Stage1Round) public stage1Rounds;
     uint256 currentRound;
 
-    constructor(string memory _name, string memory _symbol, string memory _defaultURI) ERC721(_name, _symbol) {
+    ERC20 public USDC;
+
+    constructor(string memory _name, string memory _symbol, address _usdcAddress, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 250, 0, false);
+        USDC = ERC20(_usdcAddress);
     }
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
@@ -162,6 +167,17 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
 
     function mint(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         require((price * tokenQuantity) == msg.value, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
+        if(currentRound == 3) {
+            require(publicMintingAllowed, "Minting not allowed");
+        }
+        
+        mintInternal(tokenQuantity, msg.sender);
+        emit Stage1Minted(msg.sender, tokenQuantity, msg.value, currentRound);
+    }
+
+    function mintStable(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
+        //require((price * tokenQuantity) == amount, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
+        USDC.transferFrom(msg.sender, address(this), (price * tokenQuantity));
         if(currentRound == 3) {
             require(publicMintingAllowed, "Minting not allowed");
         }
