@@ -21,7 +21,7 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     address public managerAddress;
 
     //uint256 public price = 0.04 ether;
-    uint256 public price = 2e18;
+    uint256 public price = 2e6;
 
     // URI to be used before Reveal
     string public defaultURI;
@@ -38,6 +38,7 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
     event TreasuryClaimed(address indexed to, uint256 tokenQuantity, uint256 round);
     event PublicTransferMinted(address indexed to, uint256 tokenQuantity, uint256 round);
+    event PreOrderMinted(address indexed to, address indexed from, uint256 tokenQuantity);
 
     struct Stage1Round {
         uint256 roundNumber; // 1=Seed, 2=Private, 3=Public
@@ -177,6 +178,8 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
 
     function mintStable(uint256 tokenQuantity) public payable mintPerTxtNotExceed(tokenQuantity) mintPerAddressNotExceed(tokenQuantity){
         //require((price * tokenQuantity) == amount, "Insufficient Funds Sent" ); // Amount sent should be equal to price to quantity being minted
+        uint256 allowance = USDC.allowance(msg.sender, address(this));
+        require(allowance >= (price * tokenQuantity),"Insufficient approval for funds");
         USDC.transferFrom(msg.sender, address(this), (price * tokenQuantity));
         if(currentRound == 3) {
             require(publicMintingAllowed, "Minting not allowed");
@@ -195,6 +198,13 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
             _safeMint(to, preSeedMinted);
         }
         emit PreSeedMinted(to, tokenQuantity);
+    }
+
+    function preOrderMint(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
+        require(to != address(0),"NULL Address Provided");
+                
+        mintInternal(tokenQuantity, to);
+        emit PreOrderMinted(to, msg.sender, tokenQuantity);
     }
 
     function publicAuctionTransfer(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
