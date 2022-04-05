@@ -6,9 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../ERC1404/ERC1404N.sol";
+import "../ERC1404/IERC1404N.sol";
+import "../ERC1404/ERC1404NValidator.sol";
 
-contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
+contract Nusic is ERC721Enumerable, IERC1404N, Ownable {
     using Strings for uint256;
 
     uint256 public constant MAX_SUPPLY = 10000;
@@ -32,7 +33,7 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
 
     bool public publicMintingAllowed = false;
 
-    mapping(address => bool) public approvedList;
+    //mapping(address => bool) public approvedList;
 
     event Stage1Minted(address indexed to, uint256 tokenQuantity, uint256 amountTransfered, uint256 round);
     event PreSeedMinted(address indexed to, uint256 tokenQuantity);
@@ -54,13 +55,15 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
     uint256 currentRound;
 
     ERC20 public USDC;
+    ERC1404NValidator public validator;
 
-    constructor(string memory _name, string memory _symbol, address _usdcAddress, string memory _defaultURI) ERC721(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, address _usdcAddress, address _validatorsAddress, string memory _defaultURI) ERC721(_name, _symbol) {
         defaultURI = _defaultURI;
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 250, 0, false);
         USDC = ERC20(_usdcAddress);
+        validator = ERC1404NValidator(_validatorsAddress);
     }
 
     modifier mintPerTxtNotExceed(uint256 tokenQuantity) {
@@ -120,6 +123,7 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
         price = newPrice;
     }
 
+    /*
     function addToApproveList(address[] memory _approveAddressList) public onlyOwnerORManager {
         for (uint256 i = 0; i < _approveAddressList.length; i++) {
             require(_approveAddressList[i] != address(0),"NULL Address Provided");
@@ -133,27 +137,14 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
             delete approvedList[addressList[i]];
         }
     }
-
-    function addToRestrictedList(address[] memory _restrictedAddressList) public onlyOwner {
-        for (uint256 i = 0; i < _restrictedAddressList.length; i++) {
-            require(_restrictedAddressList[i] != address(0),"NULL Address Provided");
-            restrictedList[_restrictedAddressList[i]] = true;
-        }
-    }
-
-    function removeFromRestrictedList(address[] memory _restrictedAddressList) public onlyOwner {
-        for (uint256 i = 0; i < _restrictedAddressList.length; i++) {
-            require(_restrictedAddressList[i] != address(0),"NULL Address Provided");
-            delete restrictedList[_restrictedAddressList[i]];
-        }
-    }
+    */
 
     function togglePublicMinting() public onlyOwner{
         publicMintingAllowed = !publicMintingAllowed;
     }
 
-    function mintInternal(uint256 tokenQuantity, address to) private {
-        require(approvedList[to], "Address Not Approved");
+    function mintInternal(uint256 tokenQuantity, address to) private notRestricted(address(0),to,0) {
+        //require(approvedList[to], "Address Not Approved");
         require(stage1Rounds[currentRound].isActive, "Funding Round not active");
         require(stage1Rounds[currentRound].minted < stage1Rounds[currentRound].maxSupplyForRound, "All minted for current round");
         require(stage1Rounds[currentRound].minted + tokenQuantity <= stage1Rounds[currentRound].maxSupplyForRound, "Minting would exceed supply for round");
@@ -189,7 +180,7 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
         emit Stage1Minted(msg.sender, tokenQuantity, msg.value, currentRound);
     }
 
-    function preSeedMint(uint256 tokenQuantity, address to) public onlyOwner mintPerTxtNotExceed(tokenQuantity) {
+    function preSeedMint(uint256 tokenQuantity, address to) public onlyOwner notRestricted(address(0),to,0) mintPerTxtNotExceed(tokenQuantity) {
         require(to != address(0),"NULL Address Provided");
         require((preSeedMinted + tokenQuantity) <= MAX_PRE_SEED_SUPPLY,"Minting will exceed PreSeed supply");
                 
@@ -241,6 +232,27 @@ contract Nusic is ERC721Enumerable, ERC1404N, Ownable {
         require(treasuryAddress != address(0),"NULL Address Provided");
         (bool sent, ) = treasuryAddress.call{value: address(this).balance}("");
         require(sent, "Failed to withdraw Ether");
+    }
+
+    modifier notRestricted (address from, address to, uint256 tokenId) {
+        uint8 restrictionCode = detectTransferRestriction(from, to, tokenId);
+        require(restrictionCode == validator.SUCCESS_CODE(), messageForTransferRestriction(restrictionCode));
+        _;
+    }
+
+    function detectTransferRestriction (address from, address to, uint256 tokenId)
+        public virtual override view returns (uint8 restrictionCode) {
+        // Verify the external contract is valid
+        require(address(validator) != address(0), 'ERC1404NValidators contract must be set');
+
+        // call detectTransferRestriction on the current transferRestrictions contract
+        return validator.detectTransferRestriction(from, to, tokenId);
+    }
+
+    function messageForTransferRestriction (uint8 restrictionCode)
+        public virtual override view returns (string memory message) {
+        // call messageForTransferRestriction on the current transferRestrictions contract
+        return validator.messageForTransferRestriction(restrictionCode);
     }
 
     function _beforeTokenTransfer(
