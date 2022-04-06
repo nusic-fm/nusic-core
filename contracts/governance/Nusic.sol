@@ -52,13 +52,14 @@ contract Nusic is ERC721Enumerable, IERC1404N, Ownable {
     }
 
     mapping(uint256 => Stage1Round) public stage1Rounds;
-    uint256 currentRound;
+    uint256 public currentRound;
 
     ERC20 public USDC;
     ERC1404NValidator public validator;
 
     constructor(string memory _name, string memory _symbol, address _usdcAddress, address _validatorsAddress, string memory _defaultURI) ERC721(_name, _symbol) {
-        defaultURI = _defaultURI;
+        defaultURI = "ipfs://QmXsMLpKjznF3z1KsVm5tNs3E94vj4BFAyAHvD5RTWgQ1J";
+        baseURI = _defaultURI;
         stage1Rounds[1] = Stage1Round(1, 0, 100, 0, 125, 0, false);
         stage1Rounds[2] = Stage1Round(2, 250, 125, 0, 125, 0, false);
         stage1Rounds[3] = Stage1Round(3, 500, 250, 0, 250, 0, false);
@@ -152,8 +153,8 @@ contract Nusic is ERC721Enumerable, IERC1404N, Ownable {
         
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].minted++;
-            totalMinted++;
             _safeMint(to, totalMinted);
+            totalMinted++;
         }
     }
 
@@ -185,8 +186,8 @@ contract Nusic is ERC721Enumerable, IERC1404N, Ownable {
         require((preSeedMinted + tokenQuantity) <= MAX_PRE_SEED_SUPPLY,"Minting will exceed PreSeed supply");
                 
         for(uint16 i=0; i<tokenQuantity; i++) {
-            preSeedMinted++;
             _safeMint(to, preSeedMinted);
+            preSeedMinted++;
         }
         emit PreSeedMinted(to, tokenQuantity);
     }
@@ -212,8 +213,8 @@ contract Nusic is ERC721Enumerable, IERC1404N, Ownable {
         require(totalSupply() + tokenQuantity <= MAX_SUPPLY, "Minting would exceed max supply");
         for(uint16 i=0; i<tokenQuantity; i++) {
             stage1Rounds[currentRound].treasuryClaimed++;
-            totalMinted++;
             _safeMint(treasuryAddress, totalMinted);
+            totalMinted++;
         }
         emit TreasuryClaimed(treasuryAddress, tokenQuantity,currentRound);
     }
@@ -253,6 +254,11 @@ contract Nusic is ERC721Enumerable, IERC1404N, Ownable {
         public virtual override view returns (string memory message) {
         // call messageForTransferRestriction on the current transferRestrictions contract
         return validator.messageForTransferRestriction(restrictionCode);
+    }
+
+    function setValidator(address _validator) public onlyOwner {
+        require(_validator != address(0),"NULL Address Provided");
+        validator = ERC1404NValidator(_validator);
     }
 
     function _beforeTokenTransfer(

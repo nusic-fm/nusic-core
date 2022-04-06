@@ -21,7 +21,7 @@ contract ERC1404NValidator is IERC1404N, Ownable  {
         if (!whitelist[to]) {
             restrictionCode = TRANSFER_TO_RESTRICTION_CODE; // illegal transfer to address
         }
-        else if(!whitelist[from]) {
+        else if(from != address(0) && !whitelist[from]) {
             restrictionCode = TRANSFER_FROM_RESTRICTION_CODE; // illegal transfer from address
         }
     }
