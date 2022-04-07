@@ -18,6 +18,7 @@ import "@nomiclabs/hardhat-etherscan";
 dotenv.config();
 
 const INFURA_KEY = process.env.INFURA_KEY;
+const ALCHEMY_KEY = process.env.ALCHEMY_KEY;
 
 // Replace this private key with your Ropsten account private key
 // To export your private key from Metamask, open Metamask and
@@ -77,18 +78,20 @@ export default {
     localhost: {
       url:' http://127.0.0.1:8545/'
     },
+    /*
     ropsten: {
       url: `https://ropsten.infura.io/v3/${INFURA_KEY}`,
       accounts: [`0x${ROPSTEN_PRIVATE_KEY}`]
-    },
+    },*/
     rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_KEY}`,
       accounts: [`0x${RINKEBY_PRIVATE_KEY}`]
     },
+    /*
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_KEY}`,
       accounts: [`0x${KOVAN_PRIVATE_KEY}`]
-    }
+    }*/
   },
   contractSizer: {
     alphaSort: true,
